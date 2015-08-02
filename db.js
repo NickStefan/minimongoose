@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+
 mongoose.connect('mongodb://localhost/minimongoose4');
 
 var Schema = mongoose.Schema;

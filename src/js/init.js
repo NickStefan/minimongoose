@@ -6,7 +6,7 @@ var db = new LocalDb();
 
 db.addCollection('Brand');
 db.addCollection('Car');
-
+console.log(db);
 db.Brand.upsert({
     name: 'BMW',
     updated_at: new Date()
@@ -18,6 +18,8 @@ db.Brand.upsert({
         brand_id: brand._id,
         updated_at: new Date()
     }, function (car){
-        console.log(car);
+        db.Car.findOne({},{},function(res){
+            console.log(res);
+        });
     });
 });

@@ -24,6 +24,7 @@
     "minimongo": "^3.4.1",
     "mongoose": "^4.1.0",
     "morgan": "~1.0.0",
+    "mquery": "^1.6.2",
     "static-favicon": "~1.0.0",
     "swig": "^1.4.2",
     "underscore": "^1.8.3"
