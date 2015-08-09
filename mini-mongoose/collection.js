@@ -11,7 +11,7 @@ var _ = require('underscore');
  * but we'll make it!
  */
 
-function MMCollection (col) {
+function MnMCollection (col) {
     // col should be a minimongo collection
     this.collection = col;
     this.collectionName = col.name;
@@ -24,7 +24,7 @@ function MMCollection (col) {
  * we instead return the cursors actual results
  */
 
-MMCollection.prototype.find = function (match, options, cb) {
+MnMCollection.prototype.find = function (match, options, cb) {
     this.collection
     .find(match, options)
     .fetch(function(results) {
@@ -38,7 +38,7 @@ MMCollection.prototype.find = function (match, options, cb) {
  * findOne(match, options, function(err, doc))
  */
 
-MMCollection.prototype.findOne = function (match, options, cb) {
+MnMCollection.prototype.findOne = function (match, options, cb) {
     this.find(match, options, function(err, results){
         if (results && results[0]) {
             return cb(null, results[0]);
@@ -50,7 +50,7 @@ MMCollection.prototype.findOne = function (match, options, cb) {
  * count(match, options, function(err, count))
  */
 
-MMCollection.prototype.count = function (match, options, cb) {
+MnMCollection.prototype.count = function (match, options, cb) {
     this.find(match, options, function(err, results){
         if (results) {
             return cb(null, results.length);
@@ -63,7 +63,7 @@ MMCollection.prototype.count = function (match, options, cb) {
  * TODO
  */
 
-MMCollection.prototype.distinct  = function (prop, match, options, cb) {
+MnMCollection.prototype.distinct  = function (prop, match, options, cb) {
     this.collection.distinct(prop, match, options, cb);
 }
 
@@ -75,7 +75,7 @@ MMCollection.prototype.distinct  = function (prop, match, options, cb) {
  * update param does not support { $set: {'bob': 'newName'}} syntax
  */
 
-MMCollection.prototype.update = function (match, update, options, cb) {
+MnMCollection.prototype.update = function (match, update, options, cb) {
     var self = this;
 
     this.find(match, options, function(err, results){
@@ -98,7 +98,7 @@ MMCollection.prototype.update = function (match, update, options, cb) {
  * DOES NOT SUPPORT OPTIONS YET
  */
 
-MMCollection.prototype.remove = function (match, options, cb) {
+MnMCollection.prototype.remove = function (match, options, cb) {
     var self = this;
     this.find(match, options, function(err, results){
         _.forEach(results, function(doc){
@@ -114,7 +114,7 @@ MMCollection.prototype.remove = function (match, options, cb) {
  * TODO
  */
 
-MMCollection.prototype.findAndModify = function (match, update, options, cb) {
+MnMCollection.prototype.findAndModify = function (match, update, options, cb) {
     var sort = Array.isArray(options.sort) ? options.sort : [];
     this.collection.findAndModify(match, sort, update, options, cb);
 }
@@ -124,7 +124,7 @@ MMCollection.prototype.findAndModify = function (match, update, options, cb) {
  * TODO
  */
 
-MMCollection.prototype.findStream = function(match, findOptions, streamOptions) {
+MnMCollection.prototype.findStream = function(match, findOptions, streamOptions) {
     return this.collection.find(match, findOptions).stream(streamOptions);
 }
 
@@ -137,4 +137,4 @@ MMCollection.prototype.findStream = function(match, findOptions, streamOptions) 
  * Expose
  */
 
-module.exports = MMCollection;
+module.exports = MnMCollection;

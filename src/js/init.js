@@ -1,25 +1,43 @@
-var minimongo = require('minimongo');
 
-var LocalDb = minimongo.MemoryDb;
+// var mongoose = require('mongoose');
+// var Schema = mongoose.Schema;
 
-var db = new LocalDb();
+// var brandSchema = new Schema({
+//     name: String,
+//     updated_at: Date
+// });
 
-db.addCollection('Brand');
-db.addCollection('Car');
-console.log(db);
-db.Brand.upsert({
+// brandSchema.pre('save', function(next){
+//     this.updated_at = new Date();
+//     next();
+// });
+
+var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
+var MnM = new MiniMongoose();
+
+//MnM.model('Brand', brandSchema);
+
+MnM.addToCache('Brand', '12125452', {
+    _id: '12125452',
     name: 'BMW',
     updated_at: new Date()
-}, function(brand){
+});
 
-    db.Car.upsert({
-        name: '325i',
-        brand: brand._id,
-        brand_id: brand._id,
-        updated_at: new Date()
-    }, function (car){
-        db.Car.findOne({},{},function(res){
-            console.log(res);
-        });
+MnM.addToCache('Brand', '12351234', {
+    _id: '12351234',
+    name: 'Ford',
+    updated_at: new Date()
+});
+
+MnM.Brand
+.find({name:'Ford'})
+.limit(1)
+.exec(function(err, results){
+    console.log(results);
+    MnM.Brand
+    .find({name:'BMW'})
+    .limit(1)
+    .exec(function(err, results){
+        console.log(results);
     });
 });

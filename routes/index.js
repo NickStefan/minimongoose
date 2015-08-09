@@ -1,42 +1,50 @@
 var express = require('express');
 var router = express.Router();
 
+var MiniMongoose = require('../mini-mongoose/mini-mongoose').MiniMongoose;
+var MnM = new MiniMongoose();
+
 /* GET home page. */
 router.get('/', function(req, res) {
-    var Car = req.db.Car
-    debugger
-    var mquery = require('mquery');
-    mquery.Collection = require('../mini-mongoose/collection');
+    // var Car = req.db.Car
+    // // debugger
+    // MnM.addToCache('Brand', '12125452', {
+    //     _id: '12125452',
+    //     name: 'BMW',
+    //     updated_at: new Date()
+    // });
 
-    var minimongo = require('minimongo');
+    // MnM.addToCache('Brand', '12351234', {
+    //     _id: '12351234',
+    //     name: 'Ford',
+    //     updated_at: new Date()
+    // });
 
-    var LocalDb = minimongo.MemoryDb;
-
-    var db = new LocalDb();
-
-    db.addCollection('Brand');
-
-    db.Brand.upsert([{
-        name: 'BMW',
-        updated_at: new Date()
-    },{
-        name: 'Ford',
-        updated_at: new Date()
-    }], function(err, doc){
-        db.Brand.update = function(){};
-        
-        mquery(db.Brand)
-        .find({name:'Ford'})
-        .limit(1)
-        .exec(function(err, results){
-            console.log(results);
-            res.render('index', { 
-                cache: false, 
-                title: 'minimongoose'
-            });
-        });
+    // MnM.Brand
+    // .find({name:'Ford'})
+    // .limit(1)
+    // .exec(function(err, results){
+    //     console.log(results);
+    //     MnM.Brand
+    //     .find({name:'BMW'})
+    //     .limit(1)
+    //     .exec(function(err, results){
+    //         console.log(results);
+    //         res.render('index', { 
+    //             cache: false, 
+    //             title: 'minimongoose'
+    //         });
+    //     });
+    //     // res.render('index', { 
+    //     //     cache: false, 
+    //     //     title: 'minimongoose'
+    //     // });
+    // });
+    
+    res.render('index', { 
+        cache: false, 
+        title: 'minimongoose'
     });
-
 
     // Car.find({name: '325i'})
     // .populate('brand')
