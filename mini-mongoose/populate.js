@@ -5,8 +5,6 @@ module.exports = {
     populateCallback: populateCallback
 };
 
-// WHATS completeMany?
-
 // 95% from mongoose (utils.isObject -> _.isObject)
 function populate (){
     var res = __populate.apply(null, arguments);
@@ -97,10 +95,10 @@ function preparePopulationOptionsMQ (query, options) {
     return pop;
 }
 
-// plucked from mongoose
+// 80% from mongoose
 // this goes in the _find callback of the custom collection implimentation
 
-function populateCallback(err, docs) {
+function populateCallback(err, docs, self, callback) {
     if (err) {
         return callback(err);
     }
@@ -112,14 +110,19 @@ function populateCallback(err, docs) {
     if (!options.populate) {
         return true === options.lean
         ? callback(null, docs)
-        : completeMany(self.model, docs, fields, self, null, callback);
+        : this._completeMany(self.model, docs, fields, self, null, callback);
+    }
+
+    if (!self.model) {
+        // cant populate without models!
+        return;
     }
 
     var pop = preparePopulationOptionsMQ(self, options);
-    this.model.populate(docs, pop, function (err, docs) {
+    self.model.populate(docs, pop, function (err, docs) {
         if(err) return callback(err);
         return true === options.lean
         ? callback(null, docs)
-        : completeMany(self.model, docs, fields, self, pop, callback);
+        : self._completeMany(self.model, docs, fields, self, pop, callback);
     });
 };

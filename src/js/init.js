@@ -1,43 +1,31 @@
 
-// var mongoose = require('mongoose');
-// var Schema = mongoose.Schema;
-
-// var brandSchema = new Schema({
-//     name: String,
-//     updated_at: Date
-// });
-
-// brandSchema.pre('save', function(next){
-//     this.updated_at = new Date();
-//     next();
-// });
-
 var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
 var MnM = new MiniMongoose();
 
-//MnM.model('Brand', brandSchema);
-
-MnM.addToCache('Brand', '12125452', {
+MnM.addToCache('Brand', {
     _id: '12125452',
     name: 'BMW',
     updated_at: new Date()
 });
 
-MnM.addToCache('Brand', '12351234', {
+MnM.addToCache('Brand', {
     _id: '12351234',
     name: 'Ford',
     updated_at: new Date()
 });
 
-MnM.Brand
-.find({name:'Ford'})
+MnM.addToCache('Car', {
+    _id: '12351234',
+    name: 'Mustang',
+    brand: '12351234',
+    brand_id: '12351234',
+    updated_at: new Date()
+});
+
+MnM.Car
+.find({name:'Mustang'})
+.populate({path: 'brand', model: 'Brand'})
 .limit(1)
 .exec(function(err, results){
     console.log(results);
-    MnM.Brand
-    .find({name:'BMW'})
-    .limit(1)
-    .exec(function(err, results){
-        console.log(results);
-    });
 });

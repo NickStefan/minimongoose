@@ -6,6 +6,8 @@
  */
 
 var _ = require('underscore');
+var populateCallback = require('./populate').populateCallback;
+var createModel = require('./model').createModel;
 
 /**
  * mini mongo doesnt support err, results callback style
@@ -13,9 +15,38 @@ var _ = require('underscore');
  */
 
 function MnMCollection (col) {
-    // col should be a minimongo collection
+    // col should be a minimongo collection with a few add ons
     this.collection = col;
     this.collectionName = col.name;
+    this.model = col.model;
+}
+
+
+/* straight from mongoose!
+ * hydrates many documents
+ *
+ * @param {Model} model
+ * @param {Array} docs
+ * @param {Object} fields
+ * @param {Query} self
+ * @param {Array} [pop] array of paths used in population
+ * @param {Function} callback
+ */
+
+MnMCollection.prototype._completeMany = function _completeMany (model, docs, fields, self, pop, callback) {
+  var arr = [];
+  var count = docs.length;
+  var len = count;
+  var opts = pop ?
+    { populated: pop }
+    : undefined;
+  for (var i=0; i < len; ++i) {
+    arr[i] = createModel(model, docs[i], fields);
+    arr[i].init(docs[i], opts, function (err) {
+      if (err) return callback(err);
+      --count || callback(null, arr);
+    });
+  }
 }
 
 
@@ -26,11 +57,15 @@ function MnMCollection (col) {
  */
 
 MnMCollection.prototype.find = function (match, options, cb) {
+    var self = this;
+
     this.collection
     .find(match, options)
     .fetch(function(results) {
         if (results) {
-            return cb(null, results);
+            // need to finish implimenting model and query options
+            //return populateCallback(null, results, self, cb);
+            cb(null, results)
         }
     });
 }
@@ -139,20 +174,23 @@ MnMCollection.prototype.findStream = function(match, findOptions, streamOptions)
  */
 
 module.exports = MnMCollection;
-},{"underscore":42}],2:[function(require,module,exports){
+},{"./model":3,"./populate":4,"underscore":43}],2:[function(require,module,exports){
 var minimongo = require('minimongo');
 var mquery = require('mquery');
+var _ = require('underscore');
 
 // make mongoose query builder work with mini mongo collections
 // require a custom collection class
 mquery.Collection = require('./collection');
+
 // mongoose makes a query wrapper that has populate, options etc
 // and then inherits the mquery class. we're going a little light weight here...
-mquery.populate = require('./populate').populate;
-mquery._MnMOptions = {};
+mquery.prototype.populate = require('./populate').populate;
+mquery.prototype._minimongooseOptions = {};
 
 function MiniMongoose (){
     this.db = new minimongo.MemoryDb();
+    this.models = {};
 }
 
 // add the model schemas
@@ -166,30 +204,41 @@ MiniMongoose.prototype.model = function(modelName, schema) {
 // we want to be able to just overwrite stuff ...for now.
 
 // add models to cache and expose query builder   
-MiniMongoose.prototype.addToCache = function addToCache(collectionName, id, doc){
+MiniMongoose.prototype.addToCache = function addToCache(collectionName, doc){
+
     if (!this.db[collectionName]){
         this.db.addCollection(collectionName);
         // mquery requires collections to impliment insert, remove and update
         this.db[collectionName].update = function(){};
         // expose the query builder
+        this.db[collectionName].model = this.models[collectionName];
         this[collectionName] = mquery(this.db[collectionName]);
     }
-    this.db[collectionName].items[id] = doc;
+    if (!doc._id){
+        // Need a mongoId
+        return this;
+    }
+    this.db[collectionName].items[doc._id] = doc;
     return this;
 }
     
 module.exports = {
     MiniMongoose: MiniMongoose
 };
-},{"./collection":1,"./populate":3,"minimongo":12,"mquery":32}],3:[function(require,module,exports){
+},{"./collection":1,"./populate":4,"minimongo":13,"mquery":33,"underscore":43}],3:[function(require,module,exports){
+// a place holder function for now
+function createModel(model, doc, fields){
+    return doc;
+}
+
+module.exports = createModel;
+},{}],4:[function(require,module,exports){
 var _ = require('underscore');
 
 module.exports = {
     populate: populate,
     populateCallback: populateCallback
 };
-
-// WHATS completeMany?
 
 // 95% from mongoose (utils.isObject -> _.isObject)
 function populate (){
@@ -281,10 +330,10 @@ function preparePopulationOptionsMQ (query, options) {
     return pop;
 }
 
-// plucked from mongoose
+// 80% from mongoose
 // this goes in the _find callback of the custom collection implimentation
 
-function populateCallback(err, docs) {
+function populateCallback(err, docs, self, callback) {
     if (err) {
         return callback(err);
     }
@@ -296,19 +345,24 @@ function populateCallback(err, docs) {
     if (!options.populate) {
         return true === options.lean
         ? callback(null, docs)
-        : completeMany(self.model, docs, fields, self, null, callback);
+        : this._completeMany(self.model, docs, fields, self, null, callback);
+    }
+
+    if (!self.model) {
+        // cant populate without models!
+        return;
     }
 
     var pop = preparePopulationOptionsMQ(self, options);
-    this.model.populate(docs, pop, function (err, docs) {
+    self.model.populate(docs, pop, function (err, docs) {
         if(err) return callback(err);
         return true === options.lean
         ? callback(null, docs)
-        : completeMany(self.model, docs, fields, self, pop, callback);
+        : self._completeMany(self.model, docs, fields, self, pop, callback);
     });
 };
 
-},{"underscore":42}],4:[function(require,module,exports){
+},{"underscore":43}],5:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -670,7 +724,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":11}],5:[function(require,module,exports){
+},{"util/":12}],6:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1781,7 +1835,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":6,"ieee754":7}],6:[function(require,module,exports){
+},{"base64-js":7,"ieee754":8}],7:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -1907,7 +1961,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -1993,7 +2047,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -2018,7 +2072,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2083,14 +2137,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2680,7 +2734,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":10,"inherits":8,"oMfpAn":9}],12:[function(require,module,exports){
+},{"./support/isBuffer":11,"inherits":9,"oMfpAn":10}],13:[function(require,module,exports){
 exports.MemoryDb = require('./lib/MemoryDb');
 exports.LocalStorageDb = require('./lib/LocalStorageDb');
 exports.IndexedDb = require('./lib/IndexedDb');
@@ -2689,7 +2743,7 @@ exports.RemoteDb = require('./lib/RemoteDb');
 exports.HybridDb = require('./lib/HybridDb');
 exports.utils = require('./lib/utils');
 
-},{"./lib/HybridDb":14,"./lib/IndexedDb":15,"./lib/LocalStorageDb":16,"./lib/MemoryDb":17,"./lib/RemoteDb":18,"./lib/WebSQLDb":19,"./lib/utils":22}],13:[function(require,module,exports){
+},{"./lib/HybridDb":15,"./lib/IndexedDb":16,"./lib/LocalStorageDb":17,"./lib/MemoryDb":18,"./lib/RemoteDb":19,"./lib/WebSQLDb":20,"./lib/utils":23}],14:[function(require,module,exports){
 var _ = require('lodash');
 
 EJSON = {}; // Global!
@@ -3017,7 +3071,7 @@ EJSON.clone = function (v) {
 
 module.exports = EJSON;
 
-},{"lodash":27}],14:[function(require,module,exports){
+},{"lodash":28}],15:[function(require,module,exports){
 
 /*
 
@@ -3332,7 +3386,7 @@ HybridCollection = (function() {
 
 })();
 
-},{"./utils":22,"lodash":27}],15:[function(require,module,exports){
+},{"./utils":23,"lodash":28}],16:[function(require,module,exports){
 var Collection, IDBStore, IndexedDb, async, compileSort, processFind, utils, _;
 
 _ = require('lodash');
@@ -3783,7 +3837,7 @@ Collection = (function() {
 
 })();
 
-},{"./selector":21,"./utils":22,"async":23,"idb-wrapper":25,"lodash":27}],16:[function(require,module,exports){
+},{"./selector":22,"./utils":23,"async":24,"idb-wrapper":26,"lodash":28}],17:[function(require,module,exports){
 var Collection, LocalStorageDb, compileSort, processFind, utils, _;
 
 _ = require('lodash');
@@ -4082,7 +4136,7 @@ Collection = (function() {
 
 })();
 
-},{"./selector":21,"./utils":22,"lodash":27}],17:[function(require,module,exports){
+},{"./selector":22,"./utils":23,"lodash":28}],18:[function(require,module,exports){
 var Collection, MemoryDb, compileSort, processFind, utils, _;
 
 _ = require('lodash');
@@ -4292,7 +4346,7 @@ Collection = (function() {
 
 })();
 
-},{"./selector":21,"./utils":22,"lodash":27}],18:[function(require,module,exports){
+},{"./selector":22,"./utils":23,"lodash":28}],19:[function(require,module,exports){
 var $, Collection, RemoteDb, async, jQueryHttpClient, utils, _;
 
 _ = require('lodash');
@@ -4488,7 +4542,7 @@ Collection = (function() {
 
 })();
 
-},{"./jQueryHttpClient":20,"./utils":22,"async":23,"jquery":26,"lodash":27}],19:[function(require,module,exports){
+},{"./jQueryHttpClient":21,"./utils":23,"async":24,"jquery":27,"lodash":28}],20:[function(require,module,exports){
 var Collection, WebSQLDb, async, compileSort, doNothing, processFind, utils, _;
 
 _ = require('lodash');
@@ -4911,7 +4965,7 @@ Collection = (function() {
 
 })();
 
-},{"./selector":21,"./utils":22,"async":23,"lodash":27}],20:[function(require,module,exports){
+},{"./selector":22,"./utils":23,"async":24,"lodash":28}],21:[function(require,module,exports){
 module.exports = function(method, url, params, data, success, error) {
   var fullUrl, req;
   fullUrl = url + "?" + $.param(params);
@@ -4941,7 +4995,7 @@ module.exports = function(method, url, params, data, success, error) {
   });
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /*
 ========================================
 Meteor is licensed under the MIT License
@@ -5678,7 +5732,7 @@ LocalCollection._compileSort = function (spec) {
 exports.compileDocumentSelector = compileDocumentSelector;
 exports.compileSort = LocalCollection._compileSort;
 
-},{"./EJSON":13,"lodash":27}],22:[function(require,module,exports){
+},{"./EJSON":14,"lodash":28}],23:[function(require,module,exports){
 var async, bowser, compileDocumentSelector, compileSort, deg2rad, getDistanceFromLatLngInM, isLocalStorageSupported, pointInPolygon, processGeoIntersectsOperator, processNearOperator, _;
 
 _ = require('lodash');
@@ -5979,7 +6033,7 @@ exports.regularizeUpsert = function(docs, bases, success, error) {
   return [items, success, error];
 };
 
-},{"./HybridDb":14,"./IndexedDb":15,"./LocalStorageDb":16,"./MemoryDb":17,"./WebSQLDb":19,"./selector":21,"async":23,"bowser":24,"lodash":27}],23:[function(require,module,exports){
+},{"./HybridDb":15,"./IndexedDb":16,"./LocalStorageDb":17,"./MemoryDb":18,"./WebSQLDb":20,"./selector":22,"async":24,"bowser":25,"lodash":28}],24:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -7041,7 +7095,7 @@ exports.regularizeUpsert = function(docs, bases, success, error) {
 }());
 
 }).call(this,require("oMfpAn"))
-},{"oMfpAn":9}],24:[function(require,module,exports){
+},{"oMfpAn":10}],25:[function(require,module,exports){
 /*!
   * Bowser - a browser detector
   * https://github.com/ded/bowser
@@ -7319,7 +7373,7 @@ exports.regularizeUpsert = function(docs, bases, success, error) {
   return bowser
 });
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*global window:false, self:false, define:false, module:false */
 
 /**
@@ -8666,7 +8720,7 @@ exports.regularizeUpsert = function(docs, bases, success, error) {
 
 }, this);
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -17878,7 +17932,7 @@ return jQuery;
 
 }));
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -24668,7 +24722,7 @@ return jQuery;
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 /**
@@ -24712,7 +24766,7 @@ function notImplemented (method) {
 }
 
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 var env = require('../env')
@@ -24727,7 +24781,7 @@ module.exports =
   require('./collection');
 
 
-},{"../env":31,"./collection":28,"./node":30}],30:[function(require,module,exports){
+},{"../env":32,"./collection":29,"./node":31}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -24829,7 +24883,7 @@ NodeCollection.prototype.findStream = function(match, findOptions, streamOptions
 module.exports = exports = NodeCollection;
 
 
-},{"../utils":34,"./collection":28}],31:[function(require,module,exports){
+},{"../utils":35,"./collection":29}],32:[function(require,module,exports){
 (function (process,global,Buffer){
 'use strict';
 
@@ -24855,7 +24909,7 @@ exports.type = exports.isNode ? 'node'
   : 'unknown'
 
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"buffer":5,"oMfpAn":9}],32:[function(require,module,exports){
+},{"buffer":6,"oMfpAn":10}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -27467,7 +27521,7 @@ module.exports = exports = Query;
 // TODO
 // test utils
 
-},{"./collection":29,"./collection/collection":28,"./env":31,"./permissions":33,"./utils":34,"assert":4,"bluebird":35,"debug":36,"sliced":40,"util":11}],33:[function(require,module,exports){
+},{"./collection":30,"./collection/collection":29,"./env":32,"./permissions":34,"./utils":35,"assert":5,"bluebird":36,"debug":37,"sliced":41,"util":12}],34:[function(require,module,exports){
 'use strict';
 
 var denied = exports;
@@ -27559,7 +27613,7 @@ denied.count.maxScan =
 denied.count.snapshot =
 denied.count.tailable = true;
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 
@@ -27894,7 +27948,7 @@ exports.cloneBuffer = function (buff) {
 };
 
 }).call(this,require("oMfpAn"),require("buffer").Buffer)
-},{"buffer":5,"oMfpAn":9,"regexp-clone":39}],35:[function(require,module,exports){
+},{"buffer":6,"oMfpAn":10,"regexp-clone":40}],36:[function(require,module,exports){
 (function (process,global){
 /* @preserve
  * The MIT License (MIT)
@@ -33002,7 +33056,7 @@ function isUndefined(arg) {
 },{}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
 }).call(this,require("oMfpAn"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"oMfpAn":9}],36:[function(require,module,exports){
+},{"oMfpAn":10}],37:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -33172,7 +33226,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":37}],37:[function(require,module,exports){
+},{"./debug":38}],38:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -33371,7 +33425,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":38}],38:[function(require,module,exports){
+},{"ms":39}],39:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -33498,7 +33552,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 
 var toString = Object.prototype.toString;
 
@@ -33520,10 +33574,10 @@ module.exports = exports = function (regexp) {
 }
 
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = exports = require('./lib/sliced');
 
-},{"./lib/sliced":41}],41:[function(require,module,exports){
+},{"./lib/sliced":42}],42:[function(require,module,exports){
 
 /**
  * An Array.prototype.slice.call(arguments) alternative
@@ -33558,7 +33612,7 @@ module.exports = function (args, slice, sliceEnd) {
 }
 
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -35108,49 +35162,37 @@ module.exports = function (args, slice, sliceEnd) {
   }
 }.call(this));
 
-},{}],43:[function(require,module,exports){
-
-// var mongoose = require('mongoose');
-// var Schema = mongoose.Schema;
-
-// var brandSchema = new Schema({
-//     name: String,
-//     updated_at: Date
-// });
-
-// brandSchema.pre('save', function(next){
-//     this.updated_at = new Date();
-//     next();
-// });
+},{}],44:[function(require,module,exports){
 
 var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
 var MnM = new MiniMongoose();
 
-//MnM.model('Brand', brandSchema);
-
-MnM.addToCache('Brand', '12125452', {
+MnM.addToCache('Brand', {
     _id: '12125452',
     name: 'BMW',
     updated_at: new Date()
 });
 
-MnM.addToCache('Brand', '12351234', {
+MnM.addToCache('Brand', {
     _id: '12351234',
     name: 'Ford',
     updated_at: new Date()
 });
 
-MnM.Brand
-.find({name:'Ford'})
+MnM.addToCache('Car', {
+    _id: '12351234',
+    name: 'Mustang',
+    brand: '12351234',
+    brand_id: '12351234',
+    updated_at: new Date()
+});
+
+MnM.Car
+.find({name:'Mustang'})
+.populate({path: 'brand', model: 'Brand'})
 .limit(1)
 .exec(function(err, results){
     console.log(results);
-    MnM.Brand
-    .find({name:'BMW'})
-    .limit(1)
-    .exec(function(err, results){
-        console.log(results);
-    });
 });
 
-},{"../../mini-mongoose/mini-mongoose":2}]},{},[43])
+},{"../../mini-mongoose/mini-mongoose":2}]},{},[44])
