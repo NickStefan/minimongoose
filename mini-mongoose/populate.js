@@ -2,13 +2,14 @@ var _ = require('underscore');
 
 module.exports = {
     populate: populate,
-    populateCallback: populateCallback
+    populateCallback: populateCallback,
+    preparePopulationOptionsMQ: preparePopulationOptionsMQ
 };
 
 // 95% from mongoose (utils.isObject -> _.isObject)
 function populate (){
     var res = __populate.apply(null, arguments);
-    var opts = this._minimongooseOptions;
+    var opts = this._mongooseOptions;
 
     if (!_.isObject(opts.populate)) {
         opts.populate = {};
@@ -87,12 +88,18 @@ function PopulateOptions (path, select, match, options, model, subPopulate) {
 
 // 95% from mongoose (utils.values -> _.values)
 function preparePopulationOptionsMQ (query, options) {
-    var pop = _.values(query._minimongooseOptions.populate);
+    var pop = _.values(query._mongooseOptions.populate);
 
     // lean options should trickle through all queries
     if (options.lean) pop.forEach(makeLean);
 
     return pop;
+}
+
+// straight mongoose
+function makeLean (option) {
+  option.options || (option.options = {});
+  option.options.lean = true;
 }
 
 // 80% from mongoose

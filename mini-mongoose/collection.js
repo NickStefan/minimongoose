@@ -5,8 +5,6 @@
  */
 
 var _ = require('underscore');
-var populateCallback = require('./populate').populateCallback;
-var createModel = require('./model').createModel;
 
 /**
  * mini mongo doesnt support err, results callback style
@@ -19,35 +17,6 @@ function MnMCollection (col) {
     this.collectionName = col.name;
     this.model = col.model;
 }
-
-
-/* straight from mongoose!
- * hydrates many documents
- *
- * @param {Model} model
- * @param {Array} docs
- * @param {Object} fields
- * @param {Query} self
- * @param {Array} [pop] array of paths used in population
- * @param {Function} callback
- */
-
-MnMCollection.prototype._completeMany = function _completeMany (model, docs, fields, self, pop, callback) {
-  var arr = [];
-  var count = docs.length;
-  var len = count;
-  var opts = pop ?
-    { populated: pop }
-    : undefined;
-  for (var i=0; i < len; ++i) {
-    arr[i] = createModel(model, docs[i], fields);
-    arr[i].init(docs[i], opts, function (err) {
-      if (err) return callback(err);
-      --count || callback(null, arr);
-    });
-  }
-}
-
 
 /**
  * find(match, options, function(err, docs))
@@ -62,8 +31,6 @@ MnMCollection.prototype.find = function (match, options, cb) {
     .find(match, options)
     .fetch(function(results) {
         if (results) {
-            // need to finish implimenting model and query options
-            //return populateCallback(null, results, self, cb);
             cb(null, results)
         }
     });

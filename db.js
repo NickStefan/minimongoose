@@ -40,9 +40,9 @@ Car.find({}).remove().exec(function(){
                 brand_id: brand._id
             })
             .save()
-        });        
+        });
     });
-    
+
 });
 
 
