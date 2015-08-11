@@ -1,46 +1,50 @@
-console.time('all')
+
 var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
-console.timeEnd('all')
-console.time('db')
+
 var MnM = new MiniMongoose();
-console.timeEnd('db')
 
-console.time('schema')
-MnM.model('Brand',{
-
-});
-console.timeEnd('schema')
-MnM.model('Car',{
+// load the schemas
+MnM.model('Brand', {
 
 });
 
+MnM.model('Car', {
 
-console.time('loaded');
-for (var i = 0; i < 10000; i++){
+});
 
-    MnM.addToCache('Brand', {
-        _id: i+1,
-        name: 'BMW',
-        updated_at: new Date()
-    });
+// load the data
+MnM.addToCache('Brand', {
+    _id: '1',
+    name: 'BMW',
+    updated_at: new Date()
+});
 
-    MnM.addToCache('Brand', {
-        _id: i+2,
-        name: 'Ford',
-        updated_at: new Date()
-    });
+MnM.addToCache('Brand', {
+    _id: '2',
+    name: 'Ford',
+    updated_at: new Date()
+});
 
-    MnM.addToCache('Car', {
-        _id: i+3,
-        name: 'Mustang',
-        brand: i+1,
-        brand_id: i+1,
-        updated_at: new Date()
-    });
-}
-console.timeEnd('loaded')
+MnM.addToCache('Car', {
+    _id: '3',
+    name: 'Mustang',
+    brand: '2',
+    brand_id: '2',
+    updated_at: new Date()
+});
 
-console.time('query1')
+MnM.addToCache('Car', {
+    _id: '4',
+    name: '325i',
+    brand: '1',
+    brand_id: '1',
+    updated_at: new Date()
+});
+
+// run some queries
+
+window.MnM = MnM;
+
 MnM.models.Car
 .find({name:'Mustang'})
 .populate({path: 'brand', model: 'Brand'})
@@ -48,5 +52,4 @@ MnM.models.Car
 .limit(1)
 .exec(function(err, results){
     console.log(results);
-    console.timeEnd('query1')
 });

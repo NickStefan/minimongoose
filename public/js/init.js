@@ -147,25 +147,14 @@ var Model = require('./model').Model;
 function MiniMongoose (){
     this.db = new minimongo.MemoryDb();
     this.models = {};
-    this.modelSchemas = {};
 }
 
 // add the model schemas
 MiniMongoose.prototype.model = function(modelName, schema) {
-    // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
-    var collectionName = modelName;
-    // create mini mongo collection
-    this.db.addCollection(collectionName);
-    // mquery requires generic collections to impliment insert, remove and update
-    this.db[collectionName].update = function(){};
     // create a queryable model object
-    var model = new Model(this.db[collectionName]);
-    // put the model (ie the schema, close to collections)
-    this.db[collectionName].model = model;
+    var model = new Model(this, this.db, modelName, schema);
     // expose the query builder
     this.models[modelName] = model;
-    this.modelSchemas[modelName] = model.schema;
-
     return model;
 };
 
@@ -187,14 +176,26 @@ module.exports = {
     MiniMongoose: MiniMongoose
 };
 },{"./model":3,"minimongo":14,"underscore":44}],3:[function(require,module,exports){
-(function (process){
-var Query = require('./query');
-var __populate = require('./populate').__populate;
-var Promise = Query.prototype.Promise;
+var _ = require('underscore');
 
-function Model(collection, schema){
-    this.collection = collection;
-    this.modelName = collection.name;
+var Query = require('./query');
+var Promise = Query.prototype.Promise;
+var parsePopulatePaths = require('./populate').parsePopulatePaths;
+
+function Model(minimongoose, db, modelName, schema){
+    this.minimongoose = minimongoose;
+
+    this.modelName = modelName;
+    this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
+
+    // create mini mongo collection
+    this.db = db;
+    this.db.addCollection(this.collectionName);
+
+    // mquery requires generic collections to impliment insert, remove and update
+    this.db[this.collectionName].update = function(){ /*not implimented */ };
+    this.collection = this.db[this.collectionName];
+
     this.schema = schema;
 }
 
@@ -290,50 +291,30 @@ Model.prototype.where = function where (path, val) {
 //   return model;
 // };
 
-// TODO FIRST
-// Model.prototype.populate = function(docs, pop, callback){
-//     console.log('populated!')
-//     callback(null, docs);
-// };
-
 Model.prototype.populate = function (docs, paths, cb) {
-    debugger
-  var promise = new Promise(cb);
+    // normalized paths
+    var paths = parsePopulatePaths(paths);
+    var pending = paths.length;
 
-  // always resolve on nextTick for consistent async behavior
-  function resolve () {
-    var args = Array.prototype.slice.call(arguments);
-    process.nextTick(function () {
-      promise.resolve.apply(promise, args);
-    });
-  }
+    if (0 === pending) {
+        cb(null, docs);
+    }
 
-  // normalized paths
-  var paths = __populate(paths);
-  var pending = paths.length;
+    // each path has its own query options and must be executed separately
+    var i = pending;
+    var path;
+    var model = this;
+    while (i--) {
+        path = paths[i];
+        if ('function' === typeof path.model) model = path.model;
+        populate(model, docs, path, subPopulate.call(model, docs, path, next));
+    }
 
-  if (0 === pending) {
-    resolve(null, docs);
-    return promise;
-  }
-
-  // each path has its own query options and must be executed separately
-  var i = pending;
-  var path;
-  var model = this;
-  while (i--) {
-    path = paths[i];
-    if ('function' === typeof path.model) model = path.model;
-    populate(model, docs, path, subPopulate.call(model, docs, path, next));
-  }
-
-  return promise;
-
-  function next (err) {
-    if (err) return resolve(err);
+    function next (err) {
+    if (err) return cb(err);
     if (--pending) return;
-    resolve(null, docs);
-  }
+        cb(null, docs);
+    }
 }
 
 /*!
@@ -384,6 +365,8 @@ function subPopulate (docs, options, cb) {
   }
 }
 
+function isNullOrUndefined (doc){return (doc === null) || (doc === undefined);}
+
 /*!
  * Populates `docs`
  */
@@ -398,7 +381,7 @@ function populate(model, docs, options, cb) {
     docs = [docs];
   }
 
-  if (0 === docs.length || docs.every(function (doc){return (doc === null) || (doc === undefined);})) {
+  if (0 === docs.length || _.every(docs, isNullOrUndefined)) {
     return cb();
   }
 
@@ -407,37 +390,6 @@ function populate(model, docs, options, cb) {
 
   var i, len = modelsMap.length,
     mod, match, select, promise, vals = [];
-
-  promise = new Promise(function(err, vals, options, assignmentOpts) {
-    if (err) return cb(err);
-
-    var lean = options.options && options.options.lean,
-      len = vals.length,
-      rawOrder = {}, rawDocs = {}, key, val;
-
-    // optimization:
-    // record the document positions as returned by
-    // the query result.
-    for (var i = 0; i < len; i++) {
-      val = vals[i];
-      key = String(utils.getValue('_id', val));
-      rawDocs[key] = val;
-      rawOrder[key] = i;
-
-      // flag each as result of population
-      if (!lean) val.$__.wasPopulated = true;
-    }
-
-    assignVals({
-      rawIds: rawIds,
-      rawDocs: rawDocs,
-      rawOrder: rawOrder,
-      docs: docs,
-      path: options.path,
-      options: assignmentOpts
-    });
-    cb();
-  });
 
   var _remaining = len;
   for (i = 0; i < len; i++) {
@@ -450,14 +402,16 @@ function populate(model, docs, options, cb) {
       match = {};
     }
 
-    var ids = utils.array.flatten(mod.ids, function(item) {
+    var ids = _.chain(mod.ids)
+    .flatten()
+    .filter(function(item) {
       // no need to include undefined values in our query
       return undefined !== item;
-    });
+    })
+    .uniq()
+    .value();
 
-    ids = utils.array.unique(ids);
-
-    if (0 === ids.length || ids.every(utils.isNullOrUndefined)) {
+    if (0 === ids.length || _.every(ids, isNullOrUndefined)) {
       return cb();
     }
 
@@ -477,7 +431,7 @@ function populate(model, docs, options, cb) {
         select = select.replace(excludeIdRegGlobal, ' ');
       } else {
         // preserve original select conditions by copying
-        select = utils.object.shallowCopy(select);
+        select = _.clone(select);
         delete select._id;
       }
     }
@@ -491,11 +445,42 @@ function populate(model, docs, options, cb) {
   }
 
   function next(options, assignmentOpts, err, valsFromDb) {
-    if (err) return promise.resolve(err);
+    if (err) return resolved(err);
     vals = vals.concat(valsFromDb);
     if (--_remaining === 0) {
-      promise.resolve(err, vals, options, assignmentOpts);
+      resolved(err, vals, options, assignmentOpts);
     }
+  }
+
+  function resolved(err, vals, options, assignmentOpts) {
+    if (err) return cb(err);
+
+    var lean = options.options && options.options.lean,
+      len = vals.length,
+      rawOrder = {}, rawDocs = {}, key, val;
+
+    // optimization:
+    // record the document positions as returned by
+    // the query result.
+    for (var i = 0; i < len; i++) {
+      val = vals[i];
+      key = String(_.result(val, '_id'));
+      rawDocs[key] = val;
+      rawOrder[key] = i;
+
+      // flag each as result of population
+      if (!lean) val.$__.wasPopulated = true;
+    }
+
+    assignVals({
+      rawIds: rawIds,
+      rawDocs: rawDocs,
+      rawOrder: rawOrder,
+      docs: docs,
+      path: options.path,
+      options: assignmentOpts
+    });
+    cb();
   }
 }
 
@@ -561,7 +546,7 @@ function getModelsMapForPopulate(model, docs, options) {
     while (k--) {
       modelName = modelNames[k];
       if (!available[modelName]) {
-        Model = model.db.model(modelName);
+        Model = model.minimongoose.models[modelName];
         currentOptions = {
           model: Model
         };
@@ -570,7 +555,7 @@ function getModelsMapForPopulate(model, docs, options) {
           options.model = Model;
         }
 
-        utils.merge(currentOptions, options);
+        _.defaults(currentOptions, options);
 
         available[modelName] = {
           Model: Model,
@@ -604,11 +589,11 @@ function getIdsForAndAddIdsInMapPopulate(modelsMap) {
     for (i = 0; i < len; i++) {
       ret = undefined;
       doc = docs[i];
-      id = String(utils.getValue("_id", doc));
+      id = String(_.result(doc, "_id"));
       isDocument = !! doc.$__;
 
       if (!ret || Array.isArray(ret) && 0 === ret.length) {
-        ret = utils.getValue(path, doc);
+        ret = _.result(doc, path);
       }
 
       if (ret) {
@@ -630,39 +615,150 @@ function getIdsForAndAddIdsInMapPopulate(modelsMap) {
   return rawIds;
 }
 
+/*!
+ * Retrieve the _id of `val` if a Document or Array of Documents.
+ *
+ * @param {Array|Document|Any} val
+ * @return {Array|Document|Any}
+ */
+
+function convertTo_id (val) {
+  if (val instanceof Model) return val._id;
+
+  if (Array.isArray(val)) {
+    for (var i = 0; i < val.length; ++i) {
+      if (val[i] instanceof Model) {
+        val[i] = val[i]._id;
+      }
+    }
+    return val;
+  }
+
+  return val;
+}
+
+/*!
+ * Assigns documents returned from a population query back
+ * to the original document path.
+ */
+function assignVals (o) {
+  // replace the original ids in our intermediate _ids structure
+  // with the documents found by query
+
+  assignRawDocsToIdStructure(o.rawIds, o.rawDocs, o.rawOrder, o.options);
+
+  // now update the original documents being populated using the
+  // result structure that contains real documents.
+
+  var docs = o.docs;
+  var path = o.path;
+  var rawIds = o.rawIds;
+  var options = o.options;
+
+  for (var i = 0; i < docs.length; ++i) {
+    if (_.result(docs[i], path) == null)
+      continue;
+    docs[i][path] = rawIds[i];
+    // utils.setValue(path, rawIds[i], docs[i], function (val) {
+    //   return valueFilter(val, options);
+    // });
+  }
+}
+
+/*!
+ * Assign `vals` returned by mongo query to the `rawIds`
+ * structure returned from utils.getVals() honoring
+ * query sort order if specified by user.
+ *
+ * This can be optimized.
+ *
+ * Rules:
+ *
+ *   if the value of the path is not an array, use findOne rules, else find.
+ *   for findOne the results are assigned directly to doc path (including null results).
+ *   for find, if user specified sort order, results are assigned directly
+ *   else documents are put back in original order of array if found in results
+ *
+ * @param {Array} rawIds
+ * @param {Array} vals
+ * @param {Boolean} sort
+ * @api private
+ */
+
+function assignRawDocsToIdStructure (rawIds, resultDocs, resultOrder, options, recursed) {
+  // honor user specified sort order
+  var newOrder = [];
+  var sorting = options.sort && rawIds.length > 1;
+  var found;
+  var doc;
+  var sid;
+  var id;
+
+  for (var i = 0; i < rawIds.length; ++i) {
+    id = rawIds[i];
+
+    if (Array.isArray(id)) {
+      // handle [ [id0, id2], [id3] ]
+      assignRawDocsToIdStructure(id, resultDocs, resultOrder, options, true);
+      newOrder.push(id);
+      continue;
+    }
+
+    if (null === id && !sorting) {
+      // keep nulls for findOne unless sorting, which always
+      // removes them (backward compat)
+      newOrder.push(id);
+      continue;
+    }
+
+    sid = String(id);
+    found = false;
+
+    if (recursed) {
+      // apply find behavior
+
+      // assign matching documents in original order unless sorting
+      doc = resultDocs[sid];
+      if (doc) {
+        if (sorting) {
+          newOrder[resultOrder[sid]] = doc;
+        } else {
+          newOrder.push(doc);
+        }
+      } else {
+        newOrder.push(id);
+      }
+    } else {
+      // apply findOne behavior - if document in results, assign, else assign null
+      newOrder[i] = doc = resultDocs[sid] || null;
+    }
+  }
+
+  rawIds.length = 0;
+  if (newOrder.length) {
+    // reassign the documents based on corrected order
+
+    // forEach skips over sparse entries in arrays so we
+    // can safely use this to our advantage dealing with sorted
+    // result sets too.
+    newOrder.forEach(function (doc, i) {
+      rawIds[i] = doc;
+    });
+  }
+}
+
 module.exports = {
     Model: Model
 };
-}).call(this,require("oMfpAn"))
-},{"./populate":4,"./query":5,"oMfpAn":11}],4:[function(require,module,exports){
+},{"./populate":4,"./query":5,"underscore":44}],4:[function(require,module,exports){
 var _ = require('underscore');
 
 module.exports = {
-    populate: populate,
-    __populate: __populate,
-    populateCallback: populateCallback,
-    preparePopulationOptionsMQ: preparePopulationOptionsMQ
+    parsePopulatePaths: parsePopulatePaths
 };
 
 // 95% from mongoose (utils.isObject -> _.isObject)
-function populate (){
-    var res = __populate.apply(null, arguments);
-    var opts = this._mongooseOptions;
-
-    if (!_.isObject(opts.populate)) {
-        opts.populate = {};
-    }
-
-    for (var i = 0; i < res.length; ++i) {
-        opts.populate[res[i].path] = res[i];
-    }
-
-    return this;
-};
-
-
-// 95% from mongoose (utils.isObject -> _.isObject)
-function __populate (path, select, model, match, options, subPopulate) {
+function parsePopulatePaths (path, select, model, match, options, subPopulate) {
     // The order of select/conditions args is opposite Model.find but
     // necessary to keep backward compatibility (select could be
     // an array, string, or object literal).
@@ -675,7 +771,7 @@ function __populate (path, select, model, match, options, subPopulate) {
 
         if (Array.isArray(path)) {
             return path.map(function(o){
-                return __populate(o)[0];
+                return parsePopulatePaths(o)[0];
             });
         }
 
@@ -694,11 +790,11 @@ function __populate (path, select, model, match, options, subPopulate) {
     }
 
     if ('string' != typeof path) {
-        throw new TypeError('__populate: invalid path. Expected string. Got typeof `' + typeof path + '`');
+        throw new TypeError('parsePopulatePaths: invalid path. Expected string. Got typeof `' + typeof path + '`');
     }
 
     if (typeof subPopulate === 'object') {
-        subPopulate = __populate(subPopulate);
+        subPopulate = parsePopulatePaths(subPopulate);
     }
 
     var ret = [];
@@ -723,63 +819,15 @@ function PopulateOptions (path, select, match, options, model, subPopulate) {
     this._docs = {};
 }
 
-
-// 95% from mongoose (utils.values -> _.values)
-function preparePopulationOptionsMQ (query, options) {
-    var pop = _.values(query._mongooseOptions.populate);
-
-    // lean options should trickle through all queries
-    if (options.lean) pop.forEach(makeLean);
-
-    return pop;
-}
-
-// straight mongoose
-function makeLean (option) {
-  option.options || (option.options = {});
-  option.options.lean = true;
-}
-
-// 80% from mongoose
-// this goes in the _find callback of the custom collection implimentation
-
-function populateCallback(err, docs, self, callback) {
-    if (err) {
-        return callback(err);
-    }
-
-    if (docs.length === 0) {
-        return callback(null, docs);
-    }
-
-    if (!options.populate) {
-        return true === options.lean
-        ? callback(null, docs)
-        : this._completeMany(self.model, docs, fields, self, null, callback);
-    }
-
-    if (!self.model) {
-        // cant populate without models!
-        return;
-    }
-
-    var pop = preparePopulationOptionsMQ(self, options);
-    self.model.populate(docs, pop, function (err, docs) {
-        if(err) return callback(err);
-        return true === options.lean
-        ? callback(null, docs)
-        : self._completeMany(self.model, docs, fields, self, pop, callback);
-    });
-};
-
 },{"underscore":44}],5:[function(require,module,exports){
+
+var _ = require('underscore');
 
 // make mongoose query builder work with mini mongo collections
 // require a custom collection class
 var mquery = require('mquery');
 mquery.Collection = require('./collection');
-
-var preparePopulationOptionsMQ = require('./populate').preparePopulationOptionsMQ;
+var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 // straight from mongoose
 function Query(conditions, options, model, collection) {
@@ -820,14 +868,14 @@ function Query(conditions, options, model, collection) {
         this.find(conditions);
     }
 
-    if (this.schema) {
-        this._count = this.model.hooks.createWrapper('count', Query.prototype._count, this);
-        this._execUpdate = this.model.hooks.createWrapper('update', Query.prototype._execUpdate, this);
-        this._find = this.model.hooks.createWrapper('find', Query.prototype._find, this);
-        this._findOne = this.model.hooks.createWrapper('findOne', Query.prototype._findOne, this);
-        this._findOneAndRemove = this.model.hooks.createWrapper('findOneAndRemove', Query.prototype._findOneAndRemove, this);
-        this._findOneAndUpdate = this.model.hooks.createWrapper('findOneAndUpdate', Query.prototype._findOneAndUpdate, this);
-    }
+    // if (this.schema) {
+    //     this._count = this.model.hooks.createWrapper('count', Query.prototype._count, this);
+    //     this._execUpdate = this.model.hooks.createWrapper('update', Query.prototype._execUpdate, this);
+    //     this._find = this.model.hooks.createWrapper('find', Query.prototype._find, this);
+    //     this._findOne = this.model.hooks.createWrapper('findOne', Query.prototype._findOne, this);
+    //     this._findOneAndRemove = this.model.hooks.createWrapper('findOneAndRemove', Query.prototype._findOneAndRemove, this);
+    //     this._findOneAndUpdate = this.model.hooks.createWrapper('findOneAndUpdate', Query.prototype._findOneAndUpdate, this);
+    // }
 }
 
 /*!
@@ -839,8 +887,6 @@ Query.prototype.constructor = Query;
 Query.prototype.Promise = mquery.Promise;
 
 Query.base = mquery.prototype;
-
-Query.prototype.populate = require('./populate').populate;
 
 // placeholder
 Query.prototype.cast = function(){
@@ -939,6 +985,22 @@ Query.prototype.find = function (conditions, callback) {
   return this;
 }
 
+// 95% from mongoose (utils.isObject -> _.isObject)
+Query.prototype.populate = function populate (){
+    var res = parsePopulatePaths.apply(null, arguments);
+    var opts = this._mongooseOptions;
+
+    if (!_.isObject(opts.populate)) {
+        opts.populate = {};
+    }
+
+    for (var i = 0; i < res.length; ++i) {
+        opts.populate[res[i].path] = res[i];
+    }
+
+    return this;
+};
+
 /* straight from mongoose!
  * hydrates many documents
  *
@@ -976,8 +1038,24 @@ function prepareDiscriminatorCriteria(){
 
 }
 
+// 95% from mongoose (utils.values -> _.values)
+function preparePopulationOptionsMQ (query, options) {
+    var pop = _.values(query._mongooseOptions.populate);
+
+    // lean options should trickle through all queries
+    if (options.lean) pop.forEach(makeLean);
+
+    return pop;
+}
+
+// straight mongoose
+function makeLean (option) {
+  option.options || (option.options = {});
+  option.options.lean = true;
+}
+
 module.exports = Query;
-},{"./collection":1,"./populate":4,"mquery":34}],6:[function(require,module,exports){
+},{"./collection":1,"./populate":4,"mquery":34,"underscore":44}],6:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -35778,48 +35856,52 @@ module.exports = function (args, slice, sliceEnd) {
 }.call(this));
 
 },{}],45:[function(require,module,exports){
-console.time('all')
-var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
-console.timeEnd('all')
-console.time('db')
-var MnM = new MiniMongoose();
-console.timeEnd('db')
 
-console.time('schema')
+var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
+
+var MnM = new MiniMongoose();
+
+// load the schemas
 MnM.model('Brand',{
 
 });
-console.timeEnd('schema')
+
 MnM.model('Car',{
 
 });
 
+// load the data
+MnM.addToCache('Brand', {
+    _id: '1',
+    name: 'BMW',
+    updated_at: new Date()
+});
 
-console.time('loaded');
-for (var i = 0; i < 10000; i++){
+MnM.addToCache('Brand', {
+    _id: '2',
+    name: 'Ford',
+    updated_at: new Date()
+});
 
-    MnM.addToCache('Brand', {
-        _id: i+1,
-        name: 'BMW',
-        updated_at: new Date()
-    });
+MnM.addToCache('Car', {
+    _id: '3',
+    name: 'Mustang',
+    brand: '2',
+    brand_id: '2',
+    updated_at: new Date()
+});
 
-    MnM.addToCache('Brand', {
-        _id: i+2,
-        name: 'Ford',
-        updated_at: new Date()
-    });
+MnM.addToCache('Car', {
+    _id: '4',
+    name: '325i',
+    brand: '1',
+    brand_id: '1',
+    updated_at: new Date()
+});
 
-    MnM.addToCache('Car', {
-        _id: i+3,
-        name: 'Mustang',
-        brand: i+1,
-        brand_id: i+1,
-        updated_at: new Date()
-    });
-}
-console.timeEnd('loaded')
+// run some queries
 
+window.MnM = MnM;
 console.time('query1')
 MnM.models.Car
 .find({name:'Mustang'})

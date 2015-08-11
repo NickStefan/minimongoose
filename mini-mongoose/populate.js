@@ -1,29 +1,11 @@
 var _ = require('underscore');
 
 module.exports = {
-    populate: populate,
-    __populate: __populate
+    parsePopulatePaths: parsePopulatePaths
 };
 
 // 95% from mongoose (utils.isObject -> _.isObject)
-function populate (){
-    var res = __populate.apply(null, arguments);
-    var opts = this._mongooseOptions;
-
-    if (!_.isObject(opts.populate)) {
-        opts.populate = {};
-    }
-
-    for (var i = 0; i < res.length; ++i) {
-        opts.populate[res[i].path] = res[i];
-    }
-
-    return this;
-};
-
-
-// 95% from mongoose (utils.isObject -> _.isObject)
-function __populate (path, select, model, match, options, subPopulate) {
+function parsePopulatePaths (path, select, model, match, options, subPopulate) {
     // The order of select/conditions args is opposite Model.find but
     // necessary to keep backward compatibility (select could be
     // an array, string, or object literal).
@@ -36,7 +18,7 @@ function __populate (path, select, model, match, options, subPopulate) {
 
         if (Array.isArray(path)) {
             return path.map(function(o){
-                return __populate(o)[0];
+                return parsePopulatePaths(o)[0];
             });
         }
 
@@ -55,11 +37,11 @@ function __populate (path, select, model, match, options, subPopulate) {
     }
 
     if ('string' != typeof path) {
-        throw new TypeError('__populate: invalid path. Expected string. Got typeof `' + typeof path + '`');
+        throw new TypeError('parsePopulatePaths: invalid path. Expected string. Got typeof `' + typeof path + '`');
     }
 
     if (typeof subPopulate === 'object') {
-        subPopulate = __populate(subPopulate);
+        subPopulate = parsePopulatePaths(subPopulate);
     }
 
     var ret = [];

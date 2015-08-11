@@ -1,8 +1,11 @@
 
+var _ = require('underscore');
+
 // make mongoose query builder work with mini mongo collections
 // require a custom collection class
 var mquery = require('mquery');
 mquery.Collection = require('./collection');
+var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 // straight from mongoose
 function Query(conditions, options, model, collection) {
@@ -43,14 +46,14 @@ function Query(conditions, options, model, collection) {
         this.find(conditions);
     }
 
-    if (this.schema) {
-        this._count = this.model.hooks.createWrapper('count', Query.prototype._count, this);
-        this._execUpdate = this.model.hooks.createWrapper('update', Query.prototype._execUpdate, this);
-        this._find = this.model.hooks.createWrapper('find', Query.prototype._find, this);
-        this._findOne = this.model.hooks.createWrapper('findOne', Query.prototype._findOne, this);
-        this._findOneAndRemove = this.model.hooks.createWrapper('findOneAndRemove', Query.prototype._findOneAndRemove, this);
-        this._findOneAndUpdate = this.model.hooks.createWrapper('findOneAndUpdate', Query.prototype._findOneAndUpdate, this);
-    }
+    // if (this.schema) {
+    //     this._count = this.model.hooks.createWrapper('count', Query.prototype._count, this);
+    //     this._execUpdate = this.model.hooks.createWrapper('update', Query.prototype._execUpdate, this);
+    //     this._find = this.model.hooks.createWrapper('find', Query.prototype._find, this);
+    //     this._findOne = this.model.hooks.createWrapper('findOne', Query.prototype._findOne, this);
+    //     this._findOneAndRemove = this.model.hooks.createWrapper('findOneAndRemove', Query.prototype._findOneAndRemove, this);
+    //     this._findOneAndUpdate = this.model.hooks.createWrapper('findOneAndUpdate', Query.prototype._findOneAndUpdate, this);
+    // }
 }
 
 /*!
@@ -62,8 +65,6 @@ Query.prototype.constructor = Query;
 Query.prototype.Promise = mquery.Promise;
 
 Query.base = mquery.prototype;
-
-Query.prototype.populate = require('./populate').populate;
 
 // placeholder
 Query.prototype.cast = function(){
@@ -161,6 +162,22 @@ Query.prototype.find = function (conditions, callback) {
 
   return this;
 }
+
+// 95% from mongoose (utils.isObject -> _.isObject)
+Query.prototype.populate = function populate (){
+    var res = parsePopulatePaths.apply(null, arguments);
+    var opts = this._mongooseOptions;
+
+    if (!_.isObject(opts.populate)) {
+        opts.populate = {};
+    }
+
+    for (var i = 0; i < res.length; ++i) {
+        opts.populate[res[i].path] = res[i];
+    }
+
+    return this;
+};
 
 /* straight from mongoose!
  * hydrates many documents
