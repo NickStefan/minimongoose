@@ -15,7 +15,6 @@ function MnMCollection (col) {
     // col should be a minimongo collection with a few add ons
     this.collection = col;
     this.collectionName = col.name;
-    this.model = col.model;
 }
 
 /**
@@ -25,8 +24,6 @@ function MnMCollection (col) {
  */
 
 MnMCollection.prototype.find = function (match, options, cb) {
-    var self = this;
-
     this.collection
     .find(match, options)
     .fetch(function(results) {

@@ -2,8 +2,7 @@ var _ = require('underscore');
 
 module.exports = {
     populate: populate,
-    populateCallback: populateCallback,
-    preparePopulationOptionsMQ: preparePopulationOptionsMQ
+    __populate: __populate
 };
 
 // 95% from mongoose (utils.isObject -> _.isObject)
@@ -37,7 +36,7 @@ function __populate (path, select, model, match, options, subPopulate) {
 
         if (Array.isArray(path)) {
             return path.map(function(o){
-                return exports.populate(o)[0];
+                return __populate(o)[0];
             });
         }
 
@@ -84,52 +83,3 @@ function PopulateOptions (path, select, match, options, model, subPopulate) {
     }
     this._docs = {};
 }
-
-
-// 95% from mongoose (utils.values -> _.values)
-function preparePopulationOptionsMQ (query, options) {
-    var pop = _.values(query._mongooseOptions.populate);
-
-    // lean options should trickle through all queries
-    if (options.lean) pop.forEach(makeLean);
-
-    return pop;
-}
-
-// straight mongoose
-function makeLean (option) {
-  option.options || (option.options = {});
-  option.options.lean = true;
-}
-
-// 80% from mongoose
-// this goes in the _find callback of the custom collection implimentation
-
-function populateCallback(err, docs, self, callback) {
-    if (err) {
-        return callback(err);
-    }
-
-    if (docs.length === 0) {
-        return callback(null, docs);
-    }
-
-    if (!options.populate) {
-        return true === options.lean
-        ? callback(null, docs)
-        : this._completeMany(self.model, docs, fields, self, null, callback);
-    }
-
-    if (!self.model) {
-        // cant populate without models!
-        return;
-    }
-
-    var pop = preparePopulationOptionsMQ(self, options);
-    self.model.populate(docs, pop, function (err, docs) {
-        if(err) return callback(err);
-        return true === options.lean
-        ? callback(null, docs)
-        : self._completeMany(self.model, docs, fields, self, pop, callback);
-    });
-};

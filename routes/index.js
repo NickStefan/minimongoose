@@ -6,7 +6,7 @@ var MnM = new MiniMongoose();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-    // var Car = req.db.Car
+    var Car = req.db.Car
     // // debugger
     // MnM.addToCache('Brand', '12125452', {
     //     _id: '12125452',
@@ -30,32 +30,32 @@ router.get('/', function(req, res) {
     //     .limit(1)
     //     .exec(function(err, results){
     //         console.log(results);
-    //         res.render('index', { 
-    //             cache: false, 
+    //         res.render('index', {
+    //             cache: false,
     //             title: 'minimongoose'
     //         });
     //     });
-    //     // res.render('index', { 
-    //     //     cache: false, 
+    //     // res.render('index', {
+    //     //     cache: false,
     //     //     title: 'minimongoose'
     //     // });
     // });
-    
-    res.render('index', { 
-        cache: false, 
-        title: 'minimongoose'
-    });
 
-    // Car.find({name: '325i'})
-    // .populate('brand')
-    // .exec(function(err, results){
-    //     console.log(results);
-        
-    //     res.render('index', { 
-    //         cache: false, 
-    //         title: 'minimongoose'
-    //     });
+    // res.render('index', {
+    //     cache: false,
+    //     title: 'minimongoose'
     // });
+
+    Car.find({name: '325i'})
+    .populate('brand')
+    .exec(function(err, results){
+        console.log(results);
+
+        res.render('index', {
+            cache: false,
+            title: 'minimongoose'
+        });
+    });
 
 });
 

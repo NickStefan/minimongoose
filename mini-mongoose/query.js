@@ -4,8 +4,6 @@
 var mquery = require('mquery');
 mquery.Collection = require('./collection');
 
-var preparePopulationOptionsMQ = require('./populate').preparePopulationOptionsMQ;
-
 // straight from mongoose
 function Query(conditions, options, model, collection) {
     // this stuff is for dealing with custom queries created by #toConstructor
@@ -61,6 +59,8 @@ function Query(conditions, options, model, collection) {
 
 Query.prototype = new mquery;
 Query.prototype.constructor = Query;
+Query.prototype.Promise = mquery.Promise;
+
 Query.base = mquery.prototype;
 
 Query.prototype.populate = require('./populate').populate;
@@ -197,6 +197,22 @@ function createModel(model, doc, fields){
 // placeholder
 function prepareDiscriminatorCriteria(){
 
+}
+
+// 95% from mongoose (utils.values -> _.values)
+function preparePopulationOptionsMQ (query, options) {
+    var pop = _.values(query._mongooseOptions.populate);
+
+    // lean options should trickle through all queries
+    if (options.lean) pop.forEach(makeLean);
+
+    return pop;
+}
+
+// straight mongoose
+function makeLean (option) {
+  option.options || (option.options = {});
+  option.options.lean = true;
 }
 
 module.exports = Query;
