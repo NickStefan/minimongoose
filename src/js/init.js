@@ -1,16 +1,19 @@
 
 var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
+var Schema = require('mongoose').Schema;
 
 var MnM = new MiniMongoose();
+
+var car = new Schema({
+    brand: {type: String, ref: 'Brand'}
+});
 
 // load the schemas
 MnM.model('Brand', {
 
 });
 
-MnM.model('Car', {
-
-});
+MnM.model('Car', car);
 
 // load the data
 MnM.addToCache('Brand', {
@@ -47,7 +50,8 @@ window.MnM = MnM;
 
 MnM.models.Car
 .find({name:'Mustang'})
-.populate({path: 'brand', model: 'Brand'})
+//.populate({path: 'brand', model: 'Brand'})
+.populate('brand')
 .lean()
 .limit(1)
 .exec(function(err, results){

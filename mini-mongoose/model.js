@@ -26,8 +26,49 @@ Model.prototype.init = function(){
 
 }
 
-Model.prototype._getSchema = function(){
-    return this.schema;
+Model.prototype._getSchema = function(path){
+    var schema = this.schema;
+    var pathschema = schema.path(path);
+
+    if (pathschema) return pathschema;
+
+  // look for arrays
+  // return (function search (parts, schema) {
+  //   var p = parts.length + 1
+  //     , foundschema
+  //     , trypath
+
+  //   while (p--) {
+  //     trypath = parts.slice(0, p).join('.');
+  //     foundschema = schema.path(trypath);
+  //     if (foundschema) {
+  //       if (foundschema.caster) {
+
+  //         // array of Mixed?
+  //         if (foundschema.caster instanceof Types.Mixed) {
+  //           return foundschema.caster;
+  //         }
+
+  //         // Now that we found the array, we need to check if there
+  //         // are remaining document paths to look up for casting.
+  //         // Also we need to handle array.$.path since schema.path
+  //         // doesn't work for that.
+  //         // If there is no foundschema.schema we are dealing with
+  //         // a path like array.$
+  //         if (p !== parts.length && foundschema.schema) {
+  //           if ('$' === parts[p]) {
+  //             // comments.$.comments.$.title
+  //             return search(parts.slice(p+1), foundschema.schema);
+  //           } else {
+  //             // this is the last path of the selector
+  //             return search(parts.slice(p), foundschema.schema);
+  //           }
+  //         }
+  //       }
+  //       return foundschema;
+  //     }
+  //   }
+  // })(path.split('.'), schema)
 }
 
 // 95% mongoose
@@ -307,6 +348,7 @@ function populate(model, docs, options, cb) {
 }
 
 function getModelsMapForPopulate(model, docs, options) {
+debugger
   var i, doc, len = docs.length,
     available = {},
     map = [],
@@ -329,7 +371,7 @@ function getModelsMapForPopulate(model, docs, options) {
     doc = docs[i];
 
     if(refPath){
-      modelNames = utils.getValue(refPath, doc);
+      modelNames = _.result(doc, refPath); //utils.getValue(refPath, doc);
     }else{
       if(!modelNameFromQuery){
         var schemaForCurrentDoc;
