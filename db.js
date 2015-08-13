@@ -40,6 +40,18 @@ Car.find({}).remove().exec(function(){
                 brand_id: brand._id
             })
             .save()
+            .then(function(){
+                new Brand({name:'Ford'})
+                .save()
+                .then(function(brand){
+                    new Car({
+                        name: 'Mustang',
+                        brand: brand._id,
+                        brand_id: brand._id
+                    })
+                    .save();
+                })
+            })
         });
     });
 

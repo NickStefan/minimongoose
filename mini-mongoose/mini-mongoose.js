@@ -3,15 +3,23 @@ var _ = require('underscore');
 var minimongo = require('minimongo');
 var Model = require('./model').Model;
 
-function MiniMongoose (){
-    this.db = new minimongo.MemoryDb();
+function MiniMongoose (url){
+    if (url){
+        this.localDb = new minimongo.MemoryDb();
+        this.remoteDb = new minimongo.RemoteDb(url);
+        this.db = new minimongo.HybridDb(this.localDb, this.remoteDb);
+    } else {
+        this.db = new minimongo.MemoryDb();
+    }
+
     this.models = {};
 }
 
 // add the model schemas
 MiniMongoose.prototype.model = function(modelName, schema) {
     // create a queryable model object
-    var model = new Model(this, this.db, modelName, schema);
+    var minimongoose = this;
+    var model = new Model(minimongoose, this.db, modelName, schema);
     // expose the query builder
     this.models[modelName] = model;
     return model;

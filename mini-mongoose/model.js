@@ -10,6 +10,12 @@ function Model(minimongoose, db, modelName, schema){
     this.modelName = modelName;
     this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
 
+    // if client server syncing:
+    if (minimongoose.localDb && minimongoose.remoteDb){
+        this.minimongoose.localDb.addCollection(this.collectionName);
+        this.minimongoose.remoteDb.addCollection(this.collectionName);
+    }
+
     // create mini mongo collection
     this.db = db;
     this.db.addCollection(this.collectionName);

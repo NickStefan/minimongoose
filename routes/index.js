@@ -13,7 +13,7 @@ router.get('/', function(req, res) {
     //     title: 'minimongoose'
     // });
 
-    Car.find({name: '325i'})
+    Car.find({name: 'Mustang'})
     .populate('brand')
     .exec(function(err, results){
         console.log(results);
