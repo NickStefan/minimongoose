@@ -1,0 +1,36 @@
+// need to use lodash CLI to get custom build with chaining
+// module.exports = miniLodash = {
+//   each: require('lodash/collection/each'),
+//   forEach: require('lodash/collection/forEach'),
+//   extend: require('lodash/object/extend'),
+//   isObject: require('lodash/lang/isObject'),
+//   isArray: require('lodash/lang/isArray'),
+//   isEmpty: require('lodash/lang/isEmpty'),
+//   any: require('lodash/collection/any'),
+//   every: require('lodash/collection/every'),
+//   all: require('lodash/collection/all'),
+//   has: require('lodash/object/has'),
+//   map: require('lodash/collection/map'),
+//   filter: require('lodash/collection/filter'),
+//   size: require('lodash/collection/size'),
+//   isArguments: require('lodash/lang/isArguments'),
+//   isFunction: require('lodash/lang/isFunction'),
+//   cloneDeep: require('lodash/lang/cloneDeep'),
+//   object: require('lodash/array/object'),
+//   pluck: require('lodash/collection/pluck'),
+//   pick: require('lodash/object/pick'),
+//   first: require('lodash/array/first'),
+//   rest: require('lodash/array/rest'),
+//   last: require('lodash/array/last'),
+//   values: require('lodash/object/values'),
+//   defaults: require('lodash/object/defaults'),
+//   isEqual: require('lodash/lang/isEqual'),
+//   result: require('lodash/object/result'),
+//   chain: require('lodash/chain/chain'),
+//   value: require('lodash/chain/value'),
+//   flatten: require('lodash/array/flatten'),
+//   uniq: require('lodash/array/uniq'),
+//   keys: require('lodash/object/keys')
+// };
+
+module.exports = require('lodash-compat');

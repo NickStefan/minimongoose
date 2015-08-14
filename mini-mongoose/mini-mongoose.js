@@ -1,41 +1,28 @@
-var _ = require('underscore');
-
-var minimongo = require('minimongo');
+var clientDb = require('./client-db/client-db');
 var Model = require('./model').Model;
 
 function MiniMongoose (url){
-    if (url){
-        this.localDb = new minimongo.MemoryDb();
-        this.remoteDb = new minimongo.RemoteDb(url);
-        this.db = new minimongo.HybridDb(this.localDb, this.remoteDb);
-    } else {
-        this.db = new minimongo.MemoryDb();
-    }
-
+    this.db = new clientDb.ClientDb();
     this.models = {};
 }
 
 // add the model schemas
-MiniMongoose.prototype.model = function(modelName, schema) {
+MiniMongoose.prototype.model = function(modelName, schema, options) {
     // create a queryable model object
-    var minimongoose = this;
-    var model = new Model(minimongoose, this.db, modelName, schema);
+    var model = new Model(this.db, modelName, schema, options);
     // expose the query builder
     this.models[modelName] = model;
     return model;
 };
 
-// we dont use the minimongo 'seed' function,
-// because it only seeds doc's that arent in the upsert or remove collections
-// we want to be able to just overwrite stuff ...for now.
-
-// add models to cache and expose query builder
+// add models to cache
+// this should be a method on a model. not on minimongoose
 MiniMongoose.prototype.addToCache = function addToCache(collectionName, doc){
     if (!doc._id){
         // Need a mongoId
         return this;
     }
-    this.db[collectionName].items[doc._id] = doc;
+    this.db.collections[collectionName].items[doc._id] = doc;
     return this;
 }
 

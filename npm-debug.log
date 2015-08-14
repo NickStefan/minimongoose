@@ -1,0 +1,80 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/brandcast/.nvm/v0.10.35/bin/node',
+1 verbose cli   '/Users/brandcast/.nvm/v0.10.35/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '--save',
+1 verbose cli   'jQuery@2.1.0' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.35
+4 warn package.json minimongoose@0.0.0 No description
+5 warn package.json minimongoose@0.0.0 No repository field.
+6 warn package.json minimongoose@0.0.0 No README data
+7 warn package.json zepto@0.0.4 No README data
+8 verbose readDependencies using package.json deps
+9 verbose cache add [ 'jQuery@2.1.0', null ]
+10 verbose cache add name=undefined spec="jQuery@2.1.0" args=["jQuery@2.1.0",null]
+11 verbose parsed url { protocol: null,
+11 verbose parsed url   slashes: null,
+11 verbose parsed url   auth: null,
+11 verbose parsed url   host: null,
+11 verbose parsed url   port: null,
+11 verbose parsed url   hostname: null,
+11 verbose parsed url   hash: null,
+11 verbose parsed url   search: null,
+11 verbose parsed url   query: null,
+11 verbose parsed url   pathname: 'jQuery@2.1.0',
+11 verbose parsed url   path: 'jQuery@2.1.0',
+11 verbose parsed url   href: 'jQuery@2.1.0' }
+12 verbose cache add name="jQuery" spec="2.1.0" args=["jQuery","2.1.0"]
+13 verbose parsed url { protocol: null,
+13 verbose parsed url   slashes: null,
+13 verbose parsed url   auth: null,
+13 verbose parsed url   host: null,
+13 verbose parsed url   port: null,
+13 verbose parsed url   hostname: null,
+13 verbose parsed url   hash: null,
+13 verbose parsed url   search: null,
+13 verbose parsed url   query: null,
+13 verbose parsed url   pathname: '2.1.0',
+13 verbose parsed url   path: '2.1.0',
+13 verbose parsed url   href: '2.1.0' }
+14 verbose addNamed [ 'jQuery', '2.1.0' ]
+15 verbose addNamed [ '2.1.0', '2.1.0' ]
+16 silly lockFile c220771e-jQuery-2-1-0 jQuery@2.1.0
+17 verbose lock jQuery@2.1.0 /Users/brandcast/.npm/c220771e-jQuery-2-1-0.lock
+18 verbose request where is /jQuery
+19 verbose request registry http://brandcast.io:4873/
+20 verbose request id 7575955061217117
+21 verbose url raw /jQuery
+22 verbose url resolving [ 'http://brandcast.io:4873/', './jQuery' ]
+23 verbose url resolved http://brandcast.io:4873/jQuery
+24 verbose request where is http://brandcast.io:4873/jQuery
+25 info trying registry request attempt 1 at 13:30:23
+26 verbose etag "d81d258c70ec2deb30b4ed850e5d68a4"
+27 http GET http://brandcast.io:4873/jQuery
+28 http 200 http://brandcast.io:4873/jQuery
+29 silly registry.get cb [ 200,
+29 silly registry.get   { 'x-powered-by': 'Sinopia/0.7.0',
+29 silly registry.get     'content-type': 'application/json',
+29 silly registry.get     etag: '"4a44f87440a21df0cc7119454f4c0927"',
+29 silly registry.get     vary: 'Accept-Encoding',
+29 silly registry.get     'content-encoding': 'gzip',
+29 silly registry.get     'x-status-cat': 'http://flic.kr/p/aVuVsF',
+29 silly registry.get     date: 'Thu, 13 Aug 2015 20:26:31 GMT',
+29 silly registry.get     connection: 'keep-alive',
+29 silly registry.get     'transfer-encoding': 'chunked' } ]
+30 silly lockFile c220771e-jQuery-2-1-0 jQuery@2.1.0
+31 silly lockFile c220771e-jQuery-2-1-0 jQuery@2.1.0
+32 error Error: version not found: jQuery@2.1.0
+32 error     at /Users/brandcast/.nvm/v0.10.35/lib/node_modules/npm/lib/cache/add-named.js:125:12
+32 error     at saved (/Users/brandcast/.nvm/v0.10.35/lib/node_modules/npm/node_modules/npm-registry-client/lib/get.js:167:7)
+32 error     at Object.oncomplete (fs.js:108:15)
+33 error If you need help, you may report this *entire* log,
+33 error including the npm and node versions, at:
+33 error     <http://github.com/npm/npm/issues>
+34 error System Darwin 14.3.0
+35 error command "/Users/brandcast/.nvm/v0.10.35/bin/node" "/Users/brandcast/.nvm/v0.10.35/bin/npm" "install" "--save" "jQuery@2.1.0"
+36 error cwd /Users/brandcast/minimongoose
+37 error node -v v0.10.35
+38 error npm -v 1.4.28
+39 verbose exit [ 1, true ]
