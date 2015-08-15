@@ -8,9 +8,9 @@ gulp.task('browserify', function(){
 
     /* example init */
     gulp.src('src/js/init.js')
-    .pipe(browserify({debug: false}))
+    .pipe(browserify({debug: true}))
     .pipe(concat('init.js'))
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(gulp.dest('public/js'));
 
 });

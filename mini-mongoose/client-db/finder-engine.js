@@ -1,4 +1,4 @@
-var _ = require('../mini-lodash');
+var _ = require('../lib/lodash');
 
 var compileSort = require('./selector').compileSort;
 var compileDocumentSelector = require('./selector').compileDocumentSelector;

@@ -1,4 +1,4 @@
-var _ = require('../mini-lodash');
+var _ = require('../lib/lodash');
 var finderEngine = require('./finder-engine').finderEngine;
 
 function Collection(name, options) {

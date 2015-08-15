@@ -1,5 +1,4 @@
-
-var _ = require('./mini-lodash');
+var _ = require('./lib/lodash');
 
 var mquery = require('mquery');
 // making mquery work with clientDb collections requires a custom collection class

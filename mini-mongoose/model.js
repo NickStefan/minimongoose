@@ -1,10 +1,10 @@
-var _ = require('./mini-lodash');
+var _ = require('./lib/lodash');
 
 var Query = require('./query');
 var Promise = Query.prototype.Promise;
 var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
-function Model(db, modelName, schema, options){
+function Model(minimongoose, db, modelName, schema, options){
 
         this.modelName = modelName;
         this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
@@ -14,6 +14,10 @@ function Model(db, modelName, schema, options){
         this.db.addCollection(this.collectionName, options);
 
         this.collection = this.db.collections[this.collectionName];
+
+        // indirectly expose other models to this model
+        // e.g. for populate methods
+        this.minimongoose = minimongoose;
 
         this.schema = schema;
 }

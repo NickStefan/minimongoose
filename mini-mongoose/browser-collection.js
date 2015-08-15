@@ -4,8 +4,6 @@
  * Module dependencies
  */
 
-var _ = require('./mini-lodash');
-
 /**
  * allow mquery to support a browser based collection class
  */

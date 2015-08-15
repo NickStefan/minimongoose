@@ -8,8 +8,9 @@ function MiniMongoose (url){
 
 // add the model schemas
 MiniMongoose.prototype.model = function(modelName, schema, options) {
+    var self = this;
     // create a queryable model object
-    var model = new Model(this.db, modelName, schema, options);
+    var model = new Model(self, this.db, modelName, schema, options);
     // expose the query builder
     this.models[modelName] = model;
     return model;

@@ -1,6 +1,4 @@
 
-var _ = require('../mini-lodash');
-
 var Collection = require('./collection').Collection;
 
 function ClientDb() {

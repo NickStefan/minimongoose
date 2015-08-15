@@ -1,80 +1,103 @@
 0 info it worked if it ends with ok
 1 verbose cli [ '/Users/brandcast/.nvm/v0.10.35/bin/node',
 1 verbose cli   '/Users/brandcast/.nvm/v0.10.35/bin/npm',
-1 verbose cli   'install',
-1 verbose cli   '--save',
-1 verbose cli   'jQuery@2.1.0' ]
+1 verbose cli   'install' ]
 2 info using npm@1.4.28
 3 info using node@v0.10.35
 4 warn package.json minimongoose@0.0.0 No description
 5 warn package.json minimongoose@0.0.0 No repository field.
 6 warn package.json minimongoose@0.0.0 No README data
-7 warn package.json zepto@0.0.4 No README data
-8 verbose readDependencies using package.json deps
-9 verbose cache add [ 'jQuery@2.1.0', null ]
-10 verbose cache add name=undefined spec="jQuery@2.1.0" args=["jQuery@2.1.0",null]
-11 verbose parsed url { protocol: null,
-11 verbose parsed url   slashes: null,
-11 verbose parsed url   auth: null,
-11 verbose parsed url   host: null,
-11 verbose parsed url   port: null,
-11 verbose parsed url   hostname: null,
-11 verbose parsed url   hash: null,
-11 verbose parsed url   search: null,
-11 verbose parsed url   query: null,
-11 verbose parsed url   pathname: 'jQuery@2.1.0',
-11 verbose parsed url   path: 'jQuery@2.1.0',
-11 verbose parsed url   href: 'jQuery@2.1.0' }
-12 verbose cache add name="jQuery" spec="2.1.0" args=["jQuery","2.1.0"]
-13 verbose parsed url { protocol: null,
-13 verbose parsed url   slashes: null,
-13 verbose parsed url   auth: null,
-13 verbose parsed url   host: null,
-13 verbose parsed url   port: null,
-13 verbose parsed url   hostname: null,
-13 verbose parsed url   hash: null,
-13 verbose parsed url   search: null,
-13 verbose parsed url   query: null,
-13 verbose parsed url   pathname: '2.1.0',
-13 verbose parsed url   path: '2.1.0',
-13 verbose parsed url   href: '2.1.0' }
-14 verbose addNamed [ 'jQuery', '2.1.0' ]
-15 verbose addNamed [ '2.1.0', '2.1.0' ]
-16 silly lockFile c220771e-jQuery-2-1-0 jQuery@2.1.0
-17 verbose lock jQuery@2.1.0 /Users/brandcast/.npm/c220771e-jQuery-2-1-0.lock
-18 verbose request where is /jQuery
-19 verbose request registry http://brandcast.io:4873/
-20 verbose request id 7575955061217117
-21 verbose url raw /jQuery
-22 verbose url resolving [ 'http://brandcast.io:4873/', './jQuery' ]
-23 verbose url resolved http://brandcast.io:4873/jQuery
-24 verbose request where is http://brandcast.io:4873/jQuery
-25 info trying registry request attempt 1 at 13:30:23
-26 verbose etag "d81d258c70ec2deb30b4ed850e5d68a4"
-27 http GET http://brandcast.io:4873/jQuery
-28 http 200 http://brandcast.io:4873/jQuery
-29 silly registry.get cb [ 200,
-29 silly registry.get   { 'x-powered-by': 'Sinopia/0.7.0',
-29 silly registry.get     'content-type': 'application/json',
-29 silly registry.get     etag: '"4a44f87440a21df0cc7119454f4c0927"',
-29 silly registry.get     vary: 'Accept-Encoding',
-29 silly registry.get     'content-encoding': 'gzip',
-29 silly registry.get     'x-status-cat': 'http://flic.kr/p/aVuVsF',
-29 silly registry.get     date: 'Thu, 13 Aug 2015 20:26:31 GMT',
-29 silly registry.get     connection: 'keep-alive',
-29 silly registry.get     'transfer-encoding': 'chunked' } ]
-30 silly lockFile c220771e-jQuery-2-1-0 jQuery@2.1.0
-31 silly lockFile c220771e-jQuery-2-1-0 jQuery@2.1.0
-32 error Error: version not found: jQuery@2.1.0
-32 error     at /Users/brandcast/.nvm/v0.10.35/lib/node_modules/npm/lib/cache/add-named.js:125:12
-32 error     at saved (/Users/brandcast/.nvm/v0.10.35/lib/node_modules/npm/node_modules/npm-registry-client/lib/get.js:167:7)
-32 error     at Object.oncomplete (fs.js:108:15)
-33 error If you need help, you may report this *entire* log,
-33 error including the npm and node versions, at:
-33 error     <http://github.com/npm/npm/issues>
-34 error System Darwin 14.3.0
-35 error command "/Users/brandcast/.nvm/v0.10.35/bin/node" "/Users/brandcast/.nvm/v0.10.35/bin/npm" "install" "--save" "jQuery@2.1.0"
-36 error cwd /Users/brandcast/minimongoose
-37 error node -v v0.10.35
-38 error npm -v 1.4.28
-39 verbose exit [ 1, true ]
+7 verbose readDependencies using package.json deps
+8 verbose install where, deps [ '/Users/brandcast/minimongoose',
+8 verbose install   [ 'async',
+8 verbose install     'bluebird',
+8 verbose install     'body-parser',
+8 verbose install     'consolidate',
+8 verbose install     'cookie-parser',
+8 verbose install     'debug',
+8 verbose install     'express',
+8 verbose install     'gulp',
+8 verbose install     'gulp-browserify',
+8 verbose install     'gulp-concat',
+8 verbose install     'gulp-rename',
+8 verbose install     'gulp-uglify',
+8 verbose install     'lodash',
+8 verbose install     'lodash-compat',
+8 verbose install     'mongoose',
+8 verbose install     'morgan',
+8 verbose install     'mquery',
+8 verbose install     'static-favicon',
+8 verbose install     'swig',
+8 verbose install     'lodash-cli' ] ]
+9 info preinstall minimongoose@0.0.0
+10 verbose readDependencies using package.json deps
+11 verbose already installed skipping async@1.4.0 /Users/brandcast/minimongoose
+12 verbose already installed skipping bluebird@2.9.34 /Users/brandcast/minimongoose
+13 verbose already installed skipping body-parser@1.0.0 /Users/brandcast/minimongoose
+14 verbose already installed skipping consolidate@0.10.0 /Users/brandcast/minimongoose
+15 verbose already installed skipping cookie-parser@1.0.1 /Users/brandcast/minimongoose
+16 verbose already installed skipping debug@0.7.4 /Users/brandcast/minimongoose
+17 verbose already installed skipping express@4.2.0 /Users/brandcast/minimongoose
+18 verbose already installed skipping gulp@3.8.10 /Users/brandcast/minimongoose
+19 verbose already installed skipping gulp-browserify@0.5.1 /Users/brandcast/minimongoose
+20 verbose already installed skipping gulp-concat@2.4.1 /Users/brandcast/minimongoose
+21 verbose already installed skipping gulp-rename@1.2.0 /Users/brandcast/minimongoose
+22 verbose already installed skipping gulp-uglify@1.2.0 /Users/brandcast/minimongoose
+23 verbose already installed skipping lodash@3.10.1 /Users/brandcast/minimongoose
+24 verbose already installed skipping lodash-compat@3.10.1 /Users/brandcast/minimongoose
+25 verbose already installed skipping mongoose@4.1.0 /Users/brandcast/minimongoose
+26 verbose already installed skipping morgan@1.0.0 /Users/brandcast/minimongoose
+27 verbose already installed skipping mquery@1.6.2 /Users/brandcast/minimongoose
+28 verbose already installed skipping static-favicon@1.0.0 /Users/brandcast/minimongoose
+29 verbose already installed skipping swig@1.4.2 /Users/brandcast/minimongoose
+30 verbose already installed skipping lodash-cli@3.10.1 /Users/brandcast/minimongoose
+31 silly resolved []
+32 info build /Users/brandcast/minimongoose
+33 verbose linkStuff [ false, false, false, '/Users/brandcast' ]
+34 info linkStuff minimongoose@0.0.0
+35 verbose linkBins minimongoose@0.0.0
+36 verbose linkMans minimongoose@0.0.0
+37 verbose rebuildBundles minimongoose@0.0.0
+38 verbose rebuildBundles [ '.DS_Store',
+38 verbose rebuildBundles   '.bin',
+38 verbose rebuildBundles   'async',
+38 verbose rebuildBundles   'bluebird',
+38 verbose rebuildBundles   'body-parser',
+38 verbose rebuildBundles   'consolidate',
+38 verbose rebuildBundles   'cookie-parser',
+38 verbose rebuildBundles   'debug',
+38 verbose rebuildBundles   'express',
+38 verbose rebuildBundles   'gulp',
+38 verbose rebuildBundles   'gulp-browserify',
+38 verbose rebuildBundles   'gulp-concat',
+38 verbose rebuildBundles   'gulp-rename',
+38 verbose rebuildBundles   'gulp-uglify',
+38 verbose rebuildBundles   'lodash',
+38 verbose rebuildBundles   'lodash-cli',
+38 verbose rebuildBundles   'lodash-compat',
+38 verbose rebuildBundles   'mongoose',
+38 verbose rebuildBundles   'morgan',
+38 verbose rebuildBundles   'mquery',
+38 verbose rebuildBundles   'static-favicon',
+38 verbose rebuildBundles   'swig' ]
+39 info install minimongoose@0.0.0
+40 info postinstall minimongoose@0.0.0
+41 verbose unsafe-perm in lifecycle true
+42 info minimongoose@0.0.0 Failed to exec postinstall script
+43 error minimongoose@0.0.0 postinstall: `npm run lodash-build`
+43 error Exit status 1
+44 error Failed at the minimongoose@0.0.0 postinstall script.
+44 error This is most likely a problem with the minimongoose package,
+44 error not with npm itself.
+44 error Tell the author that this fails on your system:
+44 error     npm run lodash-build
+44 error You can get their info via:
+44 error     npm owner ls minimongoose
+44 error There is likely additional logging output above.
+45 error System Darwin 14.3.0
+46 error command "/Users/brandcast/.nvm/v0.10.35/bin/node" "/Users/brandcast/.nvm/v0.10.35/bin/npm" "install"
+47 error cwd /Users/brandcast/minimongoose
+48 error node -v v0.10.35
+49 error npm -v 1.4.28
+50 error code ELIFECYCLE
+51 verbose exit [ 1, true ]

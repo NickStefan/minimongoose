@@ -1,3 +1,4 @@
+var _ = require('../lib/lodash');
 
 function prepareParams(match, options){
     match = match || {};
