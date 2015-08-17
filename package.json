@@ -10,7 +10,7 @@
   "license": "ISC",
   "scripts": {
     "postinstall":"npm run lodash-build",
-    "lodash-build":"lodash -o mini-mongoose/lib/lodash.custom.js include=isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"
+    "lodash-build":"lodash -o mini-mongoose/lib/lodash.custom.js include=slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"
   },
   "dependencies": {
     "async": "1.4.0",

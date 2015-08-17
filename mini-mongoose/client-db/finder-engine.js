@@ -15,10 +15,10 @@ var finderEngine = function(items, match, options) {
         query = query.sort(compileSort(options.sort))
     }
     if (options.skip) {
-        query = query.rest(options.skip);
+        query = query.slice(options.skip);
     }
     if (options.limit) {
-        query = query.first(options.limit);
+        query = query.slice(0, options.limit);
     }
     if (options.fields) {
         query = query.map(function(doc){ return _.pick(doc, options.fields)});
