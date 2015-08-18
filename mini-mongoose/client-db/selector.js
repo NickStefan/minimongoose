@@ -1,4 +1,5 @@
 var _ = require('../lib/lodash');
+var helpers = require('../lib/helpers');
 
 /*
 ========================================
@@ -555,28 +556,45 @@ LocalCollection._makeLookupFunction = function (key) {
   return function (doc) {
     if (doc == null)  // null or undefined
       return [undefined];
-    var firstLevel = doc[first];
 
-    // We don't "branch" at the final level.
-    if (!lookupRest)
-      return [firstLevel];
+    // NEW ADDITION:
+    if (helpers.isImmutable(doc)){
+      var firstLevel = doc.get(first);
+      if (!lookupRest)
+        return [firstLevel];
+      // DIFF from original: if its not a map, its a more "array like" immutable type
+      if (!helpers.isMap(firstLevel) && firstLevel.size === 0)
+        return [undefined];
+      // DIFF from original: if its a map, its less like a more "array like" immutable type
+      if (helpers.isMap(firstLevel) || nextIsNumeric)
+        firstLevel = [firstLevel];
+      return Array.prototype.concat.apply([], _.map(firstLevel, lookupRest));
 
-    // It's an empty array, and we're not done: we won't find anything.
-    if (isArray(firstLevel) && firstLevel.length === 0)
-      return [undefined];
+    // not immutable
+    } else {
+      var firstLevel = doc[first];
 
-    // For each result at this level, finish the lookup on the rest of the key,
-    // and return everything we find. Also, if the next result is a number,
-    // don't branch here.
-    //
-    // Technically, in MongoDB, we should be able to handle the case where
-    // objects have numeric keys, but Mongo doesn't actually handle this
-    // consistently yet itself, see eg
-    // https://jira.mongodb.org/browse/SERVER-2898
-    // https://github.com/mongodb/mongo/blob/master/jstests/array_match2.js
-    if (!isArray(firstLevel) || nextIsNumeric)
-      firstLevel = [firstLevel];
-    return Array.prototype.concat.apply([], _.map(firstLevel, lookupRest));
+      // We don't "branch" at the final level.
+      if (!lookupRest)
+        return [firstLevel];
+
+      // It's an empty array, and we're not done: we won't find anything.
+      if (isArray(firstLevel) && firstLevel.length === 0)
+        return [undefined];
+
+      // For each result at this level, finish the lookup on the rest of the key,
+      // and return everything we find. Also, if the next result is a number,
+      // don't branch here.
+      //
+      // Technically, in MongoDB, we should be able to handle the case where
+      // objects have numeric keys, but Mongo doesn't actually handle this
+      // consistently yet itself, see eg
+      // https://jira.mongodb.org/browse/SERVER-2898
+      // https://github.com/mongodb/mongo/blob/master/jstests/array_match2.js
+      if (!isArray(firstLevel) || nextIsNumeric)
+        firstLevel = [firstLevel];
+      return Array.prototype.concat.apply([], _.map(firstLevel, lookupRest));
+    }
   };
 };
 

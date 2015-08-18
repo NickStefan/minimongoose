@@ -1,12 +1,15 @@
 var _ = require('../lib/lodash');
 
 var queryServer = require('./query-server').queryServer;
-var finderEngine = require('./finder-engine').finderEngine;
+var finder = require('./engine').finder;
+var seeder = require('./engine').seeder;
+var remover = require('./engine').remover;
+var items = require('./engine').items;
 var FlightManager = require('./flight-manager').FlightManager;
 
 function Collection(name, model, options) {
     this.collectionName = name;
-    this.items = {};
+    this.items = items();
     this.flightManager = new FlightManager();
     this.model = model;
 }
@@ -15,7 +18,7 @@ Collection.prototype.find = function(match, options, cb){
     var self = this;
     var qry = this.flightManager.stringifyQuery(match, options);
     var callback = function(){
-        cb(null, finderEngine(self.items, match, options));
+        cb(null, finder(self.items, match, options));
     };
 
     if (this.flightManager.previousFlight(qry)){
@@ -34,17 +37,9 @@ Collection.prototype.find = function(match, options, cb){
     }
 };
 
-Collection.prototype.seed = function(docs, cb) {
+Collection.prototype.seed = function(docs) {
     var self = this;
-    if (!_.isArray(docs)) {
-        docs = [docs];
-    }
-    _.forEach(docs, function(doc){
-        if (_.has(doc, '_id')){
-            self.items[doc._id] = doc;
-        }
-    });
-    cb && cb(null, docs);
+    seeder(self, this.items, docs);
 };
 
 Collection.prototype.findOne = function(match, options, cb){
@@ -83,9 +78,7 @@ Collection.prototype.findAndModify = function(match, update, options, cb){
 Collection.prototype.remove = function(match, options, cb) {
     var self = this;
     this.find(match, options, function(err, results){
-        _.forEach(results, function(matched){
-            delete self.items[matched._id];
-        });
+        remover(self, self.items, results);
         cb(null, results);
     });
 };

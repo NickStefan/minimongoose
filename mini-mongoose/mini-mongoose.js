@@ -18,12 +18,12 @@ MiniMongoose.prototype.model = function(modelName, schema, options) {
 
 // add models to cache
 // this should be a method on a model. not on minimongoose
-MiniMongoose.prototype.addToCache = function addToCache(collectionName, doc){
-    if (!doc._id){
-        // Need a mongoId
-        return this;
-    }
-    this.db.collections[collectionName].items[doc._id] = doc;
+MiniMongoose.prototype.addToCache = function addToCache(collectionName, docOrDocs){
+    // if (!doc._id){
+    //     // Need a mongoId
+    //     return this;
+    // }
+    this.db.collections[collectionName].seed(docOrDocs);
     return this;
 }
 

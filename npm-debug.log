@@ -1,103 +1,81 @@
 0 info it worked if it ends with ok
 1 verbose cli [ '/Users/brandcast/.nvm/v0.10.35/bin/node',
 1 verbose cli   '/Users/brandcast/.nvm/v0.10.35/bin/npm',
-1 verbose cli   'install' ]
+1 verbose cli   'install',
+1 verbose cli   'immutable.js',
+1 verbose cli   '--save' ]
 2 info using npm@1.4.28
 3 info using node@v0.10.35
 4 warn package.json minimongoose@0.0.0 No description
 5 warn package.json minimongoose@0.0.0 No repository field.
 6 warn package.json minimongoose@0.0.0 No README data
 7 verbose readDependencies using package.json deps
-8 verbose install where, deps [ '/Users/brandcast/minimongoose',
-8 verbose install   [ 'async',
-8 verbose install     'bluebird',
-8 verbose install     'body-parser',
-8 verbose install     'consolidate',
-8 verbose install     'cookie-parser',
-8 verbose install     'debug',
-8 verbose install     'express',
-8 verbose install     'gulp',
-8 verbose install     'gulp-browserify',
-8 verbose install     'gulp-concat',
-8 verbose install     'gulp-rename',
-8 verbose install     'gulp-uglify',
-8 verbose install     'lodash',
-8 verbose install     'lodash-compat',
-8 verbose install     'mongoose',
-8 verbose install     'morgan',
-8 verbose install     'mquery',
-8 verbose install     'static-favicon',
-8 verbose install     'swig',
-8 verbose install     'lodash-cli' ] ]
-9 info preinstall minimongoose@0.0.0
-10 verbose readDependencies using package.json deps
-11 verbose already installed skipping async@1.4.0 /Users/brandcast/minimongoose
-12 verbose already installed skipping bluebird@2.9.34 /Users/brandcast/minimongoose
-13 verbose already installed skipping body-parser@1.0.0 /Users/brandcast/minimongoose
-14 verbose already installed skipping consolidate@0.10.0 /Users/brandcast/minimongoose
-15 verbose already installed skipping cookie-parser@1.0.1 /Users/brandcast/minimongoose
-16 verbose already installed skipping debug@0.7.4 /Users/brandcast/minimongoose
-17 verbose already installed skipping express@4.2.0 /Users/brandcast/minimongoose
-18 verbose already installed skipping gulp@3.8.10 /Users/brandcast/minimongoose
-19 verbose already installed skipping gulp-browserify@0.5.1 /Users/brandcast/minimongoose
-20 verbose already installed skipping gulp-concat@2.4.1 /Users/brandcast/minimongoose
-21 verbose already installed skipping gulp-rename@1.2.0 /Users/brandcast/minimongoose
-22 verbose already installed skipping gulp-uglify@1.2.0 /Users/brandcast/minimongoose
-23 verbose already installed skipping lodash@3.10.1 /Users/brandcast/minimongoose
-24 verbose already installed skipping lodash-compat@3.10.1 /Users/brandcast/minimongoose
-25 verbose already installed skipping mongoose@4.1.0 /Users/brandcast/minimongoose
-26 verbose already installed skipping morgan@1.0.0 /Users/brandcast/minimongoose
-27 verbose already installed skipping mquery@1.6.2 /Users/brandcast/minimongoose
-28 verbose already installed skipping static-favicon@1.0.0 /Users/brandcast/minimongoose
-29 verbose already installed skipping swig@1.4.2 /Users/brandcast/minimongoose
-30 verbose already installed skipping lodash-cli@3.10.1 /Users/brandcast/minimongoose
-31 silly resolved []
-32 info build /Users/brandcast/minimongoose
-33 verbose linkStuff [ false, false, false, '/Users/brandcast' ]
-34 info linkStuff minimongoose@0.0.0
-35 verbose linkBins minimongoose@0.0.0
-36 verbose linkMans minimongoose@0.0.0
-37 verbose rebuildBundles minimongoose@0.0.0
-38 verbose rebuildBundles [ '.DS_Store',
-38 verbose rebuildBundles   '.bin',
-38 verbose rebuildBundles   'async',
-38 verbose rebuildBundles   'bluebird',
-38 verbose rebuildBundles   'body-parser',
-38 verbose rebuildBundles   'consolidate',
-38 verbose rebuildBundles   'cookie-parser',
-38 verbose rebuildBundles   'debug',
-38 verbose rebuildBundles   'express',
-38 verbose rebuildBundles   'gulp',
-38 verbose rebuildBundles   'gulp-browserify',
-38 verbose rebuildBundles   'gulp-concat',
-38 verbose rebuildBundles   'gulp-rename',
-38 verbose rebuildBundles   'gulp-uglify',
-38 verbose rebuildBundles   'lodash',
-38 verbose rebuildBundles   'lodash-cli',
-38 verbose rebuildBundles   'lodash-compat',
-38 verbose rebuildBundles   'mongoose',
-38 verbose rebuildBundles   'morgan',
-38 verbose rebuildBundles   'mquery',
-38 verbose rebuildBundles   'static-favicon',
-38 verbose rebuildBundles   'swig' ]
-39 info install minimongoose@0.0.0
-40 info postinstall minimongoose@0.0.0
-41 verbose unsafe-perm in lifecycle true
-42 info minimongoose@0.0.0 Failed to exec postinstall script
-43 error minimongoose@0.0.0 postinstall: `npm run lodash-build`
-43 error Exit status 1
-44 error Failed at the minimongoose@0.0.0 postinstall script.
-44 error This is most likely a problem with the minimongoose package,
-44 error not with npm itself.
-44 error Tell the author that this fails on your system:
-44 error     npm run lodash-build
-44 error You can get their info via:
-44 error     npm owner ls minimongoose
-44 error There is likely additional logging output above.
-45 error System Darwin 14.3.0
-46 error command "/Users/brandcast/.nvm/v0.10.35/bin/node" "/Users/brandcast/.nvm/v0.10.35/bin/npm" "install"
-47 error cwd /Users/brandcast/minimongoose
-48 error node -v v0.10.35
-49 error npm -v 1.4.28
-50 error code ELIFECYCLE
-51 verbose exit [ 1, true ]
+8 verbose cache add [ 'immutable.js', null ]
+9 verbose cache add name=undefined spec="immutable.js" args=["immutable.js",null]
+10 verbose parsed url { protocol: null,
+10 verbose parsed url   slashes: null,
+10 verbose parsed url   auth: null,
+10 verbose parsed url   host: null,
+10 verbose parsed url   port: null,
+10 verbose parsed url   hostname: null,
+10 verbose parsed url   hash: null,
+10 verbose parsed url   search: null,
+10 verbose parsed url   query: null,
+10 verbose parsed url   pathname: 'immutable.js',
+10 verbose parsed url   path: 'immutable.js',
+10 verbose parsed url   href: 'immutable.js' }
+11 silly lockFile 78b65bb5-immutable-js immutable.js
+12 verbose lock immutable.js /Users/brandcast/.npm/78b65bb5-immutable-js.lock
+13 silly lockFile 78b65bb5-immutable-js immutable.js
+14 silly lockFile 78b65bb5-immutable-js immutable.js
+15 verbose addNamed [ 'immutable.js', '' ]
+16 verbose addNamed [ null, '*' ]
+17 silly lockFile 79e03703-immutable-js immutable.js@
+18 verbose lock immutable.js@ /Users/brandcast/.npm/79e03703-immutable-js.lock
+19 silly addNameRange { name: 'immutable.js', range: '*', hasData: false }
+20 verbose request where is /immutable.js
+21 verbose request registry http://brandcast.io:4873/
+22 verbose request id 39aed915f659fde2
+23 verbose url raw /immutable.js
+24 verbose url resolving [ 'http://brandcast.io:4873/', './immutable.js' ]
+25 verbose url resolved http://brandcast.io:4873/immutable.js
+26 verbose request where is http://brandcast.io:4873/immutable.js
+27 info trying registry request attempt 1 at 01:14:17
+28 http GET http://brandcast.io:4873/immutable.js
+29 http 404 http://brandcast.io:4873/immutable.js
+30 verbose headers { 'x-powered-by': 'Sinopia/0.7.0',
+30 verbose headers   'content-type': 'application/json',
+30 verbose headers   'content-length': '66',
+30 verbose headers   etag: '"2047168049"',
+30 verbose headers   vary: 'Accept-Encoding',
+30 verbose headers   'x-status-cat': 'http://flic.kr/p/aV6juR',
+30 verbose headers   date: 'Tue, 18 Aug 2015 08:10:18 GMT',
+30 verbose headers   connection: 'keep-alive' }
+31 silly registry.get cb [ 404,
+31 silly registry.get   { 'x-powered-by': 'Sinopia/0.7.0',
+31 silly registry.get     'content-type': 'application/json',
+31 silly registry.get     'content-length': '66',
+31 silly registry.get     etag: '"2047168049"',
+31 silly registry.get     vary: 'Accept-Encoding',
+31 silly registry.get     'x-status-cat': 'http://flic.kr/p/aV6juR',
+31 silly registry.get     date: 'Tue, 18 Aug 2015 08:10:18 GMT',
+31 silly registry.get     connection: 'keep-alive' } ]
+32 silly lockFile 79e03703-immutable-js immutable.js@
+33 silly lockFile 79e03703-immutable-js immutable.js@
+34 error 404 404 Not Found: immutable.js
+34 error 404
+34 error 404 'immutable.js' is not in the npm registry.
+34 error 404 You should bug the author to publish it
+34 error 404 It was specified as a dependency of 'minimongoose'
+34 error 404
+34 error 404 Maybe try 'npm search immutable'
+34 error 404
+34 error 404 Note that you can also install from a
+34 error 404 tarball, folder, or http url, or git url.
+35 error System Darwin 14.3.0
+36 error command "/Users/brandcast/.nvm/v0.10.35/bin/node" "/Users/brandcast/.nvm/v0.10.35/bin/npm" "install" "immutable.js" "--save"
+37 error cwd /Users/brandcast/minimongoose
+38 error node -v v0.10.35
+39 error npm -v 1.4.28
+40 error code E404
+41 verbose exit [ 1, true ]

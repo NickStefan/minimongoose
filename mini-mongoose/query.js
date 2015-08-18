@@ -1,4 +1,5 @@
 var _ = require('./lib/lodash');
+var helpers = require('./lib/helpers');
 
 var mquery = require('mquery');
 // making mquery work with clientDb collections requires a custom collection class
@@ -86,7 +87,7 @@ Query.prototype.lean = function (v) {
     return this;
 }
 
-// straight mongoose
+// straight mongoose, but a change for immutability
 Query.prototype._find = function(callback) {
     if (this._castError) {
         callback(this._castError);
@@ -105,7 +106,7 @@ Query.prototype._find = function(callback) {
             return callback(err);
         }
 
-        if (docs.length === 0) {
+        if ((helpers.isImmutable(docs) && docs.size === 0) || (!helpers.isImmutable(docs) && docs.length === 0)){
             return callback(null, docs);
         }
 
