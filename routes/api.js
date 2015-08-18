@@ -1,8 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
-function mongoMongooseMediator(model, op, params, cb){
-	var query = model[op](params.selector);
+function mongoMongooseMediator(req, res, cb){
+	console.log(req.body)
+	var params = req.body;
+	var model = req.db[params.modelName];
+	var query = model[params.operation](JSON.parse(params.match));
+
 	if (params.fields){
 		query = query.select(params.fields);
 	}
@@ -18,15 +22,14 @@ function mongoMongooseMediator(model, op, params, cb){
 	query.exec(cb);
 }
 
-router.get('/Car', function(req, res) {
-	var Car = req.db.Car;
-	mongoMongooseMediator(Car, 'find', req.params, function(err, results){ res.send(JSON.stringify(results)); });
-
-});
-
-router.get('/Brand', function(req, res) {
-	var Brand = req.db.Brand;
-	mongoMongooseMediator(Brand, 'find', req.params, function(err, results){ res.send(JSON.stringify(results)); });
+router.post('/', function(req, res) {
+	var modelName = req.body.modelName;
+	mongoMongooseMediator(req, res, function(err, results){
+		res.send(JSON.stringify({
+			modelName: modelName,
+			results: results
+		}));
+	});
 });
 
 module.exports = router;

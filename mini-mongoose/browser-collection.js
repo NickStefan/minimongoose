@@ -19,7 +19,6 @@ function BrowserCollection (collection) {
  */
 
 BrowserCollection.prototype.find = function (match, options, cb) {
-    console.log(match, options);
     this.collection.find(match, options, cb);
 };
 

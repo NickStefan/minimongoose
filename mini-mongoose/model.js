@@ -5,13 +5,16 @@ var Promise = Query.prototype.Promise;
 var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 function Model(minimongoose, db, modelName, schema, options){
-
+        var self = this;
+        var collectionOptions = {};
         this.modelName = modelName;
         this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
+        this.resource = '/api/';
 
         // create clientDb collection
         this.db = db;
-        this.db.addCollection(this.collectionName, options);
+        collectionOptions.model = this;
+        this.db.addCollection(this.collectionName, self, collectionOptions);
 
         this.collection = this.db.collections[this.collectionName];
 
