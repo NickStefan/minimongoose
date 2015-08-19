@@ -340,9 +340,9 @@ function populate(model, docs, options, cb) {
             rawOrder = {}, rawDocs = {}, key, val;
 
         if (helpers.isImmutable(vals)){
-            vals.forEach(iterateDocs);
+            rawDocs = vals;
         } else {
-            _.forEach(iterateDocs);
+            _.forEach(vals, iterateDocs);
         }
 
         // optimization:
@@ -533,7 +533,9 @@ function assignVals (o) {
     // replace the original ids in our intermediate _ids structure
     // with the documents found by query
 
-    assignRawDocsToIdStructure(o.rawIds, o.rawDocs, o.rawOrder, o.options);
+    if (!helpers.isImmutable(o.rawDocs)){
+        assignRawDocsToIdStructure(o.rawIds, o.rawDocs, o.rawOrder, o.options);
+    }
 
     // now update the original documents being populated using the
     // result structure that contains real documents.
@@ -541,8 +543,8 @@ function assignVals (o) {
     var docs = o.docs;
     var path = o.path;
     var rawIds = o.rawIds;
+    var rawDocs = o.rawDocs;
     var options = o.options;
-    var j = 0;
 
     if (helpers.isImmutable(docs)){
         docs.forEach(iterateImmutableDocs);
@@ -562,9 +564,8 @@ function assignVals (o) {
 
     function iterateImmutableDocs(doc, key){
         if (doc.get(path) === null || doc.get(path) === undefined) return;
-        var updatedDoc = doc.set(path, rawIds[j]);
+        var updatedDoc = doc.set(path, rawDocs.get(doc.get(path)));
         docs = docs.set(key, updatedDoc);
-        j = j+1;
     }
 }
 

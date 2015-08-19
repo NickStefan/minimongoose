@@ -39,6 +39,38 @@ Collection.prototype.find = function(match, options, cb){
     }
 };
 
+Collection.prototype.populateHash = function(match, options, cb){
+    var self = this;
+    var ids = match._id.$in;
+    var qry = this.flightManager.stringifyQuery(match, options);
+    var callback = function(){
+        cb(null, populateHashFinder(self.items, match, options));
+    };
+
+    if (this.flightManager.previousFlight(qry)){
+        callback();
+
+    } else if (this.flightManager.inFlight(qry)){
+        this.flightManager.addFlightCallback(qry, callback);
+
+    } else {
+        // clone match._id.$in
+        // iterate ids in this.items,
+        // if there, clonedMatch._id.$in.pop()
+        // if clonedMatch.length, queryServer
+        // else callback()
+
+        this.flightManager.addFlightCallback(qry, callback);
+        queryServer(self, match, options, function(err, results){
+            // should add a check for modelName here
+            if (results.results) {
+                self.seed(results.results);
+            }
+            self.flightManager.resolveFlight(qry);
+        });
+    }
+};
+
 Collection.prototype.seed = function(docs) {
     this.items = seeder(this.items, docs);
 };

@@ -77,9 +77,26 @@ function finder(items, match, options) {
 function finderImmutable(items, match, options){
     options = options || {};
 
-    var query = items.filter(function(doc){
-        return compileDocumentSelector(match)(doc);
-    });
+    // if its a straight populate, use hash table shortcut
+    var query;
+    if (_.keys(match).length === 1 && match._id && match._id.$in){
+        query = items;
+
+    // if its a populate with constraints, shrink the space
+    } else if (match._id && match._id.$in){
+        query = Immutable.OrderedMap().withMutations(function(map){
+            _.forEach(match._id.$in, function(id){
+                map = map.set(id, items.get(id));
+            });
+            return map;
+        });
+
+    // not a populate
+    } else {
+        query = items.filter(function(doc){
+            return compileDocumentSelector(match)(doc);
+        });
+    }
 
     if (options.sort) {
         // TODO
@@ -100,16 +117,16 @@ function finderImmutable(items, match, options){
     return query;
 }
 
-// module.exports = {
-// 	finder: finder,
-//     seeder: seeder,
-//     remover: remover,
-//     items: items
-// };
-
 module.exports = {
-    finder: finderImmutable,
-    seeder: seederImmutable,
-    remover: removerImmutable,
-    items: itemsImmutable
+	finder: finder,
+    seeder: seeder,
+    remover: remover,
+    items: items
 };
+
+// module.exports = {
+//     finder: finderImmutable,
+//     seeder: seederImmutable,
+//     remover: removerImmutable,
+//     items: itemsImmutable
+// };
