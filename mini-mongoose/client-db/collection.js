@@ -31,7 +31,9 @@ Collection.prototype.find = function(match, options, cb){
         this.flightManager.addFlightCallback(qry, callback);
         queryServer(self, match, options, function(err, results){
             // should add a check for modelName here
-            self.seed(results.results);
+            if (results.results) {
+                self.seed(results.results);
+            }
             self.flightManager.resolveFlight(qry);
         });
     }

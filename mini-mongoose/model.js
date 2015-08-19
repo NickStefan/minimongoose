@@ -1,28 +1,30 @@
 var _ = require('./lib/lodash');
+var helpers = require('./lib/helpers');
+var Immutable = require('immutable');
 
 var Query = require('./query');
 var Promise = Query.prototype.Promise;
 var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 function Model(minimongoose, db, modelName, schema, options){
-        var self = this;
-        var collectionOptions = {};
-        this.modelName = modelName;
-        this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
-        this.resource = '/api/';
+    var self = this;
+    var collectionOptions = {};
+    this.modelName = modelName;
+    this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
+    this.resource = '/api/';
 
-        // create clientDb collection
-        this.db = db;
-        collectionOptions.model = this;
-        this.db.addCollection(this.collectionName, self, collectionOptions);
+    // create clientDb collection
+    this.db = db;
+    collectionOptions.model = this;
+    this.db.addCollection(this.collectionName, self, collectionOptions);
 
-        this.collection = this.db.collections[this.collectionName];
+    this.collection = this.db.collections[this.collectionName];
 
-        // indirectly expose other models to this model
-        // e.g. for populate methods
-        this.minimongoose = minimongoose;
+    // indirectly expose other models to this model
+    // e.g. for populate methods
+    this.minimongoose = minimongoose;
 
-        this.schema = schema;
+    this.schema = schema;
 }
 
 // placeholder
@@ -31,125 +33,125 @@ Model.prototype.init = function(){
 }
 
 Model.prototype._getSchema = function(path){
-        var schema = this.schema;
-        var pathschema = schema.path(path);
+    var schema = this.schema;
+    var pathschema = schema.path(path);
 
-        if (pathschema) return pathschema;
+    if (pathschema) return pathschema;
 
-    // look for arrays
-    // return (function search (parts, schema) {
-    //   var p = parts.length + 1
-    //     , foundschema
-    //     , trypath
+// look for arrays
+// return (function search (parts, schema) {
+//   var p = parts.length + 1
+//     , foundschema
+//     , trypath
 
-    //   while (p--) {
-    //     trypath = parts.slice(0, p).join('.');
-    //     foundschema = schema.path(trypath);
-    //     if (foundschema) {
-    //       if (foundschema.caster) {
+//   while (p--) {
+//     trypath = parts.slice(0, p).join('.');
+//     foundschema = schema.path(trypath);
+//     if (foundschema) {
+//       if (foundschema.caster) {
 
-    //         // array of Mixed?
-    //         if (foundschema.caster instanceof Types.Mixed) {
-    //           return foundschema.caster;
-    //         }
+//         // array of Mixed?
+//         if (foundschema.caster instanceof Types.Mixed) {
+//           return foundschema.caster;
+//         }
 
-    //         // Now that we found the array, we need to check if there
-    //         // are remaining document paths to look up for casting.
-    //         // Also we need to handle array.$.path since schema.path
-    //         // doesn't work for that.
-    //         // If there is no foundschema.schema we are dealing with
-    //         // a path like array.$
-    //         if (p !== parts.length && foundschema.schema) {
-    //           if ('$' === parts[p]) {
-    //             // comments.$.comments.$.title
-    //             return search(parts.slice(p+1), foundschema.schema);
-    //           } else {
-    //             // this is the last path of the selector
-    //             return search(parts.slice(p), foundschema.schema);
-    //           }
-    //         }
-    //       }
-    //       return foundschema;
-    //     }
-    //   }
-    // })(path.split('.'), schema)
+//         // Now that we found the array, we need to check if there
+//         // are remaining document paths to look up for casting.
+//         // Also we need to handle array.$.path since schema.path
+//         // doesn't work for that.
+//         // If there is no foundschema.schema we are dealing with
+//         // a path like array.$
+//         if (p !== parts.length && foundschema.schema) {
+//           if ('$' === parts[p]) {
+//             // comments.$.comments.$.title
+//             return search(parts.slice(p+1), foundschema.schema);
+//           } else {
+//             // this is the last path of the selector
+//             return search(parts.slice(p), foundschema.schema);
+//           }
+//         }
+//       }
+//       return foundschema;
+//     }
+//   }
+// })(path.split('.'), schema)
 }
 
 // 95% mongoose
 Model.prototype.find = function(conditions, projection, options, callback) {
-        if ('function' == typeof conditions) {
-                callback = conditions;
-                conditions = {};
-                projection = null;
-                options = null;
-        } else if ('function' == typeof projection) {
-                callback = projection;
-                projection = null;
-                options = null;
-        } else if ('function' == typeof options) {
-                callback = options;
-                options = null;
-        }
+    if ('function' == typeof conditions) {
+            callback = conditions;
+            conditions = {};
+            projection = null;
+            options = null;
+    } else if ('function' == typeof projection) {
+            callback = projection;
+            projection = null;
+            options = null;
+    } else if ('function' == typeof options) {
+            callback = options;
+            options = null;
+    }
 
-        // get the clientDb collection object
-        var mq = new Query({}, options, this, this.collection);
+    // get the clientDb collection object
+    var mq = new Query({}, options, this, this.collection);
 
-        // TODO
-        // mq.select(projection);
-        // if (this.schema.discriminatorMapping && mq.selectedInclusively()) {
-        //     mq.select(this.schema.options.discriminatorKey);
-        // }
-        return mq.find(conditions, callback);
+    // TODO
+    // mq.select(projection);
+    // if (this.schema.discriminatorMapping && mq.selectedInclusively()) {
+    //     mq.select(this.schema.options.discriminatorKey);
+    // }
+    return mq.find(conditions, callback);
 };
 
 // 95% mongoose
 Model.prototype.findById = function findById (id, projection, options, callback) {
-        return this.findOne({ _id: id }, projection, options, callback);
+    return this.findOne({ _id: id }, projection, options, callback);
 };
 
 // 95% mongoose
 Model.prototype.findOne = function findOne (conditions, projection, options, callback) {
-        if ('function' == typeof options) {
-                callback = options;
-                options = null;
-        } else if ('function' == typeof projection) {
-                callback = projection;
-                projection = null;
-                options = null;
-        } else if ('function' == typeof conditions) {
-                callback = conditions;
-                conditions = {};
-                projection = null;
-                options = null;
-        }
+    if ('function' == typeof options) {
+            callback = options;
+            options = null;
+    } else if ('function' == typeof projection) {
+            callback = projection;
+            projection = null;
+            options = null;
+    } else if ('function' == typeof conditions) {
+            callback = conditions;
+            conditions = {};
+            projection = null;
+            options = null;
+    }
 
-        // get the clientDb collection object
-        var mq = new Query({}, options, this, this.collection);
+    // get the clientDb collection object
+    var mq = new Query({}, options, this, this.collection);
 
-        // TODO
-        // mq.select(projection);
-        // if (this.schema.discriminatorMapping && mq.selectedInclusively()) {
-        //     mq.select(this.schema.options.discriminatorKey);
-        // }
+    // TODO
+    // mq.select(projection);
+    // if (this.schema.discriminatorMapping && mq.selectedInclusively()) {
+    //     mq.select(this.schema.options.discriminatorKey);
+    // }
 
-        return mq.findOne(conditions, callback);
+    return mq.findOne(conditions, callback);
 };
 
 // 100% mongoose
 Model.prototype.count = function count (conditions, callback) {
-        if ('function' === typeof conditions) callback = conditions, conditions = {};
+    if ('function' === typeof conditions) callback = conditions, conditions = {};
 
-        // get the clientDb collection object
-        var mq = new Query({}, {}, this, this.collection);
+    // get the clientDb collection object
+    var mq = new Query({}, {}, this, this.collection);
 
-        return mq.count(conditions, callback);
+    return mq.count(conditions, callback);
 };
 
 // 100% mongoose
 Model.prototype.where = function where (path, val) {
-        // get the clientDb collection object
-        var mq = new Query({}, {}, this, this.collection).find({});
-        return mq.where.apply(mq, arguments);
+    // get the clientDb collection object
+    var mq = new Query({}, {}, this, this.collection).find({});
+    return mq.where.apply(mq, arguments);
 };
 
 // Model.hydrate = function (obj) {
@@ -159,29 +161,29 @@ Model.prototype.where = function where (path, val) {
 // };
 
 Model.prototype.populate = function (docs, paths, cb) {
-        // normalized paths
-        var paths = parsePopulatePaths(paths);
-        var pending = paths.length;
+    // normalized paths
+    var paths = parsePopulatePaths(paths);
+    var pending = paths.length;
 
-        if (0 === pending) {
-                cb(null, docs);
-        }
+    if (0 === pending) {
+        cb(null, docs);
+    }
 
-        // each path has its own query options and must be executed separately
-        var i = pending;
-        var path;
-        var model = this;
-        while (i--) {
-                path = paths[i];
-                if ('function' === typeof path.model) model = path.model;
-                populate(model, docs, path, subPopulate.call(model, docs, path, next));
-        }
+    // each path has its own query options and must be executed separately
+    var i = pending;
+    var path;
+    var model = this;
+    while (i--) {
+        path = paths[i];
+        if ('function' === typeof path.model) model = path.model;
+        populate(model, docs, path, subPopulate.call(model, docs, path, next));
+    }
 
-        function next (err) {
+    function next (err) {
         if (err) return cb(err);
         if (--pending) return;
-                cb(null, docs);
-        }
+        cb(null, docs);
+    }
 }
 
 /*!
@@ -203,7 +205,7 @@ function subPopulate (docs, options, cb) {
     }
 
     // normalize as array
-    if (!Array.isArray(pop)) {
+    if (!_.isArray(pop)) {
         pop = [pop];
     }
 
@@ -229,10 +231,12 @@ function subPopulate (docs, options, cb) {
             }
             Model.populate.call(subOptions.model || model, docs, subOptions, next);
         });
-    }
+    };
 }
 
-function isNullOrUndefined (doc){return (doc === null) || (doc === undefined);}
+function isNullOrUndefined (doc){
+    return helpers.isImmutable(doc) ? doc.size === 0 : ((doc === null) || (doc === undefined));
+}
 
 /*!
  * Populates `docs`
@@ -244,11 +248,17 @@ function populate(model, docs, options, cb) {
     var modelsMap, rawIds;
 
     // normalize single / multiple docs passed
-    if (!Array.isArray(docs)) {
+    if (helpers.isImmutable(docs) && !helpers.isOrderedMap(docs)){
+        var obj = {};
+        obj[ docs.get('_id') ] = docs;
+        docs = Immutable.OrderedMap(obj);
+    } else if (!helpers.isImmutable(docs) && !_.isArray(docs)) {
         docs = [docs];
     }
 
-    if (0 === docs.length || _.every(docs, isNullOrUndefined)) {
+    if (helpers.isImmutable(docs) && (docs.size === 0 || docs.every(isNullOrUndefined))){
+        return cb();
+    } else if (!helpers.isImmutable(docs) && (0 === docs.length || _.every(docs, isNullOrUndefined))) {
         return cb();
     }
 
@@ -313,7 +323,11 @@ function populate(model, docs, options, cb) {
 
     function next(options, assignmentOpts, err, valsFromDb) {
         if (err) return resolved(err);
-        vals = vals.concat(valsFromDb);
+        if (helpers.isImmutable(valsFromDb)){
+            vals = valsFromDb;
+        } else {
+            vals = vals.concat(valsFromDb);
+        }
         if (--_remaining === 0) {
             resolved(err, vals, options, assignmentOpts);
         }
@@ -323,16 +337,20 @@ function populate(model, docs, options, cb) {
         if (err) return cb(err);
 
         var lean = options.options && options.options.lean,
-            len = vals.length,
             rawOrder = {}, rawDocs = {}, key, val;
+
+        if (helpers.isImmutable(vals)){
+            vals.forEach(iterateDocs);
+        } else {
+            _.forEach(iterateDocs);
+        }
 
         // optimization:
         // record the document positions as returned by
         // the query result.
-        for (var i = 0; i < len; i++) {
-            val = vals[i];
-            key = String(_.result(val, '_id'));
-            rawDocs[key] = val;
+        function iterateDocs(doc, i){
+            var key = helpers.isImmutable(doc) ? String(doc.get('_id')) : String(doc._id);
+            rawDocs[key] = doc;
             rawOrder[key] = i;
 
             // flag each as result of population
@@ -352,8 +370,7 @@ function populate(model, docs, options, cb) {
 }
 
 function getModelsMapForPopulate(model, docs, options) {
-    var i, doc, len = docs.length,
-        available = {},
+    var available = {},
         map = [],
         modelNameFromQuery = options.model && options.model.modelName || options.model,
         schema, refPath, Model, currentOptions, modelNames, modelName, discriminatorKey, modelForFindSchema;
@@ -370,9 +387,15 @@ function getModelsMapForPopulate(model, docs, options) {
 
     refPath = schema && schema.options && schema.options.refPath;
 
-    for (i = 0; i < len; i++) {
-        doc = docs[i];
+    if (helpers.isImmutable(docs)){
+        docs.forEach(iterateDocs);
+    } else {
+        _.forEach(docs, iterateDocs);
+    }
 
+    return map;
+
+    function iterateDocs(doc) {
         if(refPath){
             modelNames = _.result(doc, refPath); //utils.getValue(refPath, doc);
         }else{
@@ -403,9 +426,9 @@ function getModelsMapForPopulate(model, docs, options) {
         }
 
         if (!modelNames)
-            continue;
+            return;
 
-        if (!Array.isArray(modelNames)) {
+        if (!_.isArray(modelNames)) {
             modelNames = [modelNames];
         }
 
@@ -437,8 +460,6 @@ function getModelsMapForPopulate(model, docs, options) {
 
         }
     }
-
-    return map;
 }
 
 function getIdsForAndAddIdsInMapPopulate(modelsMap) {
@@ -456,11 +477,11 @@ function getIdsForAndAddIdsInMapPopulate(modelsMap) {
         for (i = 0; i < len; i++) {
             ret = undefined;
             doc = docs[i];
-            id = String(_.result(doc, "_id"));
+            id = helpers.isImmutable(doc) ? String(doc.get('_id')) : String(_.result(doc, "_id"));
             isDocument = !! doc.$__;
 
             if (!ret || Array.isArray(ret) && 0 === ret.length) {
-                ret = _.result(doc, path);
+                ret = helpers.isImmutable(doc) ? doc.get(path) : _.result(doc, path);
             }
 
             if (ret) {
@@ -521,14 +542,27 @@ function assignVals (o) {
     var path = o.path;
     var rawIds = o.rawIds;
     var options = o.options;
+    var j = 0;
 
-    for (var i = 0; i < docs.length; ++i) {
-        if (_.result(docs[i], path) == null)
-            continue;
-        docs[i][path] = rawIds[i];
+    if (helpers.isImmutable(docs)){
+        docs.forEach(iterateImmutableDocs);
+    } else {
+        _.forEach(docs, iterateDocs);
+    }
+
+    function iterateDocs(doc, i){
+        if (_.result(doc, path) === null || _.result(doc, path) === undefined) return;
+        doc[path] = rawIds[i];
         // utils.setValue(path, rawIds[i], docs[i], function (val) {
         //   return valueFilter(val, options);
         // });
+    }
+
+    function iterateImmutableDocs(doc, key){
+        if (doc.get(path) === null || doc.get(path) === undefined) return;
+        var updatedDoc = doc.set(path, rawIds[j]);
+        o.docs = o.docs.set(key, updatedDoc);
+        j = j+1;
     }
 }
 

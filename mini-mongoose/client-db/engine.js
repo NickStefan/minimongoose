@@ -1,6 +1,6 @@
 var _ = require('../lib/lodash');
 var Immutable = require('immutable');
-
+// http://ericwooley.github.io/immutablejs/react/2015/04/01/using-immutablejs/
 var compileSort = require('./selector').compileSort;
 var compileDocumentSelector = require('./selector').compileDocumentSelector;
 
@@ -9,7 +9,7 @@ function items(){
 }
 
 function itemsImmutable(){
-    return Immutable.OrderedSet([]);
+    return Immutable.OrderedMap();
 }
 
 function seeder(items, docs){
@@ -27,8 +27,14 @@ function seederImmutable(collection, items, docs){
     if (!_.isArray(docs)) {
         docs = [docs];
     }
+
     var docs = Immutable.fromJS(docs);
-    collection.items = collection.items.merge(docs);
+    collection.items = collection.items.withMutations(function(map){
+        docs.forEach(function(doc){
+            map = map.set(doc.get('_id'), doc);
+        });
+        return map;
+    });
 }
 
 function remover(items, docs){

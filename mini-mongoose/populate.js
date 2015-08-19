@@ -16,7 +16,7 @@ function parsePopulatePaths (path, select, model, match, options, subPopulate) {
             return [path];
         }
 
-        if (Array.isArray(path)) {
+        if (_.isArray(path)) {
             return path.map(function(o){
                 return parsePopulatePaths(o)[0];
             });

@@ -101,7 +101,7 @@ MnM.models.Car
     //.limit(1)
     .lean()
     .exec(function(err, results){
-        //console.log(results.toJS());
-        console.timeEnd('bob3')
+        console.log(results.toJS());
+        console.timeEnd('bob3');
     });
 });

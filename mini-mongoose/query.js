@@ -9,51 +9,51 @@ var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 // straight from mongoose
 function Query(conditions, options, model, collection) {
-        // this stuff is for dealing with custom queries created by #toConstructor
-        if (!this._mongooseOptions) {
-                this._mongooseOptions = {};
-        }
+    // this stuff is for dealing with custom queries created by #toConstructor
+    if (!this._mongooseOptions) {
+            this._mongooseOptions = {};
+    }
 
-        // this is the case where we have a CustomQuery, we need to check if we got
-        // options passed in, and if we did, merge them in
-        if (options) {
-                var keys = Object.keys(options);
-                for (var i=0; i < keys.length; i++) {
-                        var k = keys[i];
-                        this._mongooseOptions[k] = options[k];
-                }
-        }
+    // this is the case where we have a CustomQuery, we need to check if we got
+    // options passed in, and if we did, merge them in
+    if (options) {
+            var keys = _.keys(options);
+            for (var i=0; i < keys.length; i++) {
+                    var k = keys[i];
+                    this._mongooseOptions[k] = options[k];
+            }
+    }
 
-        if (collection) {
-                this.mongooseCollection = collection;
-        }
+    if (collection) {
+            this.mongooseCollection = collection;
+    }
 
-        if (model) {
-                this.model = model;
-                this.schema = model.schema;
-        }
+    if (model) {
+            this.model = model;
+            this.schema = model.schema;
+    }
 
-        // this is needed because map reduce returns a model that can be queried, but
-        // all of the queries on said model should be lean
-        if (this.model && this.model._mapreduce) {
-                this.lean();
-        }
+    // this is needed because map reduce returns a model that can be queried, but
+    // all of the queries on said model should be lean
+    if (this.model && this.model._mapreduce) {
+            this.lean();
+    }
 
-        // inherit mquery
-        mquery.call(this, this.mongooseCollection, options);
+    // inherit mquery
+    mquery.call(this, this.mongooseCollection, options);
 
-        if (conditions) {
-                this.find(conditions);
-        }
+    if (conditions) {
+            this.find(conditions);
+    }
 
-        // if (this.schema) {
-        //     this._count = this.model.hooks.createWrapper('count', Query.prototype._count, this);
-        //     this._execUpdate = this.model.hooks.createWrapper('update', Query.prototype._execUpdate, this);
-        //     this._find = this.model.hooks.createWrapper('find', Query.prototype._find, this);
-        //     this._findOne = this.model.hooks.createWrapper('findOne', Query.prototype._findOne, this);
-        //     this._findOneAndRemove = this.model.hooks.createWrapper('findOneAndRemove', Query.prototype._findOneAndRemove, this);
-        //     this._findOneAndUpdate = this.model.hooks.createWrapper('findOneAndUpdate', Query.prototype._findOneAndUpdate, this);
-        // }
+    // if (this.schema) {
+    //     this._count = this.model.hooks.createWrapper('count', Query.prototype._count, this);
+    //     this._execUpdate = this.model.hooks.createWrapper('update', Query.prototype._execUpdate, this);
+    //     this._find = this.model.hooks.createWrapper('find', Query.prototype._find, this);
+    //     this._findOne = this.model.hooks.createWrapper('findOne', Query.prototype._findOne, this);
+    //     this._findOneAndRemove = this.model.hooks.createWrapper('findOneAndRemove', Query.prototype._findOneAndRemove, this);
+    //     this._findOneAndUpdate = this.model.hooks.createWrapper('findOneAndUpdate', Query.prototype._findOneAndUpdate, this);
+    // }
 }
 
 /*!
@@ -167,18 +167,18 @@ Query.prototype.find = function (conditions, callback) {
 
 // 95% from mongoose (utils.isObject -> _.isObject)
 Query.prototype.populate = function populate (){
-        var res = parsePopulatePaths.apply(null, arguments);
-        var opts = this._mongooseOptions;
+    var res = parsePopulatePaths.apply(null, arguments);
+    var opts = this._mongooseOptions;
 
-        if (!_.isObject(opts.populate)) {
-                opts.populate = {};
-        }
+    if (!_.isObject(opts.populate)) {
+            opts.populate = {};
+    }
 
-        for (var i = 0; i < res.length; ++i) {
-                opts.populate[res[i].path] = res[i];
-        }
+    for (var i = 0; i < res.length; ++i) {
+            opts.populate[res[i].path] = res[i];
+    }
 
-        return this;
+    return this;
 };
 
 /* straight from mongoose!
@@ -210,7 +210,7 @@ function completeMany (model, docs, fields, self, pop, callback) {
 
 // a place holder function for now
 function createModel(model, doc, fields){
-        return doc;
+    return doc;
 }
 
 // placeholder
@@ -220,12 +220,12 @@ function prepareDiscriminatorCriteria(){
 
 // 95% from mongoose (utils.values -> _.values)
 function preparePopulationOptionsMQ (query, options) {
-        var pop = _.values(query._mongooseOptions.populate);
+    var pop = _.values(query._mongooseOptions.populate);
 
-        // lean options should trickle through all queries
-        if (options.lean) pop.forEach(makeLean);
+    // lean options should trickle through all queries
+    if (options.lean) pop.forEach(makeLean);
 
-        return pop;
+    return pop;
 }
 
 // straight mongoose
