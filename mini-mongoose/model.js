@@ -179,7 +179,7 @@ Model.prototype.populate = function (docs, paths, cb) {
         populate(model, docs, path, subPopulate.call(model, docs, path, next));
     }
 
-    function next (err) {
+    function next (err, docs){
         if (err) return cb(err);
         if (--pending) return;
         cb(null, docs);
@@ -209,13 +209,13 @@ function subPopulate (docs, options, cb) {
         pop = [pop];
     }
 
-    return function (err) {
+    return function (err, docs){
         var pending = pop.length;
 
-        function next (err) {
+        function next (err, docs){
             if (err) return cb(err);
             if (--pending) return;
-            cb();
+            cb(null, docs);
         }
 
         if (err || !pending) return cb(err);
@@ -357,7 +357,7 @@ function populate(model, docs, options, cb) {
             if (!lean) val.$__.wasPopulated = true;
         }
 
-        assignVals({
+        docs = assignVals({
             rawIds: rawIds,
             rawDocs: rawDocs,
             rawOrder: rawOrder,
@@ -365,7 +365,7 @@ function populate(model, docs, options, cb) {
             path: options.path,
             options: assignmentOpts
         });
-        cb();
+        cb(null, docs);
     }
 }
 
@@ -550,6 +550,8 @@ function assignVals (o) {
         _.forEach(docs, iterateDocs);
     }
 
+    return docs;
+
     function iterateDocs(doc, i){
         if (_.result(doc, path) === null || _.result(doc, path) === undefined) return;
         doc[path] = rawIds[i];
@@ -561,7 +563,7 @@ function assignVals (o) {
     function iterateImmutableDocs(doc, key){
         if (doc.get(path) === null || doc.get(path) === undefined) return;
         var updatedDoc = doc.set(path, rawIds[j]);
-        o.docs = o.docs.set(key, updatedDoc);
+        docs = docs.set(key, updatedDoc);
         j = j+1;
     }
 }

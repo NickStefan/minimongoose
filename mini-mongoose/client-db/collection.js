@@ -40,8 +40,7 @@ Collection.prototype.find = function(match, options, cb){
 };
 
 Collection.prototype.seed = function(docs) {
-    var self = this;
-    seeder(self, this.items, docs);
+    this.items = seeder(this.items, docs);
 };
 
 Collection.prototype.findOne = function(match, options, cb){

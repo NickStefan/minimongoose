@@ -13,7 +13,7 @@ MnM.model('Brand', {});
 MnM.model('Car', car);
 
 //load the data
-for (var i = 0; i < 1000; i++){
+for (var i = 0; i < 50; i++){
     (function(){
         var r = Math.floor(Math.random() * 100000);
 
@@ -101,7 +101,7 @@ MnM.models.Car
     //.limit(1)
     .lean()
     .exec(function(err, results){
-        console.log(results.toJS());
+        //console.log(results.toJS());
         console.timeEnd('bob3');
     });
 });

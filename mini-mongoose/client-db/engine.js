@@ -21,15 +21,16 @@ function seeder(items, docs){
             items[doc._id] = doc;
         }
     });
+    return items;
 }
 
-function seederImmutable(collection, items, docs){
+function seederImmutable(items, docs){
     if (!_.isArray(docs)) {
         docs = [docs];
     }
 
     var docs = Immutable.fromJS(docs);
-    collection.items = collection.items.withMutations(function(map){
+    return items.withMutations(function(map){
         docs.forEach(function(doc){
             map = map.set(doc.get('_id'), doc);
         });
