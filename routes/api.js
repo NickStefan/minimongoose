@@ -18,7 +18,7 @@ function mongoMongooseMediator(req, res, cb){
 	if (params.skip){
 		query = query.skip(params.skip);
 	}
-	query.exec(cb);
+	query.lean().exec(cb);
 }
 
 router.post('/', function(req, res) {

@@ -2,11 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res) {
+router.get('/', function(req, res, next) {
 
     req.MnM.models.Car
     .find({name:'Mustang'})
-    //.populate({path: 'brand', model: 'Brand'})
     //.populate('brand')
     //.limit(1)
     .lean()
@@ -16,9 +15,12 @@ router.get('/', function(req, res) {
             title: 'minimongoose',
             results: results
         });
-        console.log('bob', results);
+        next();
+        //console.log(results);
     });
 
+}, function(req, res, next){
+    req.MnM.empty();
 });
 
 module.exports = router;

@@ -32,6 +32,7 @@ FlightManager.prototype.addFlightCallback = function (qry, cb) {
 };
 
 FlightManager.prototype.previousFlight = function (qry) {
+    console.log(_.has(this.queries, qry));
     return _.has(this.queries, qry);
 };
 

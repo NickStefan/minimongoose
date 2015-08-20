@@ -20,7 +20,7 @@ var options = {
         if (options.skip){
             query = query.skip(options.skip);
         }
-        query.exec(function(err, results){
+        query.lean().exec(function(err, results){
             var mediated = {
                 results: results,
                 modelName: options.modelName

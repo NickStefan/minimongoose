@@ -17,6 +17,8 @@ function seeder(items, docs){
     }
     _.forEach(docs, function(doc){
         if (_.has(doc, '_id')){
+            // get string of mongoose's bson object (node specific)
+            doc._id = doc._id.toString();
             items[doc._id] = doc;
         }
     });
@@ -189,12 +191,12 @@ function populateHashFinderImmutable(items, match, options){
     return query;
 }
 
-// finder = finderImmutable;
-// seeder = seederImmutable;
-// remover = removerImmutable;
-// checker = checkerImmutable;
-// populateHashFinder = populateHashFinderImmutable;
-// items = itemsImmutable;
+finder = finderImmutable;
+seeder = seederImmutable;
+remover = removerImmutable;
+checker = checkerImmutable;
+populateHashFinder = populateHashFinderImmutable;
+items = itemsImmutable;
 
 export {
     finder,
