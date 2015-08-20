@@ -8,9 +8,10 @@
  * allow mquery to support a browser based collection class
  */
 
-function BrowserCollection (collection) {
-    this.collection = collection;
-    this.collectionName = collection.collectionName;
+exports.__esModule = true;
+function BrowserCollection(collection) {
+  this.collection = collection;
+  this.collectionName = collection.collectionName;
 }
 
 /**
@@ -19,7 +20,7 @@ function BrowserCollection (collection) {
  */
 
 BrowserCollection.prototype.find = function (match, options, cb) {
-    this.collection.find(match, options, cb);
+  this.collection.find(match, options, cb);
 };
 
 /**
@@ -27,7 +28,7 @@ BrowserCollection.prototype.find = function (match, options, cb) {
  */
 
 BrowserCollection.prototype.findOne = function (match, options, cb) {
-    this.collection.findOne(match, options, cb);
+  this.collection.findOne(match, options, cb);
 };
 
 /**
@@ -35,7 +36,7 @@ BrowserCollection.prototype.findOne = function (match, options, cb) {
  */
 
 BrowserCollection.prototype.count = function (match, options, cb) {
-    this.collection.count(match, options, cb);
+  this.collection.count(match, options, cb);
 };
 
 /**
@@ -43,9 +44,9 @@ BrowserCollection.prototype.count = function (match, options, cb) {
  * TODO
  */
 
-BrowserCollection.prototype.distinct  = function (prop, match, options, cb) {
-    this.collection.distinct(prop, match, options, cb);
-}
+BrowserCollection.prototype.distinct = function (prop, match, options, cb) {
+  this.collection.distinct(prop, match, options, cb);
+};
 
 /**
  * update(match, update, options, function(err[, result]))
@@ -55,7 +56,7 @@ BrowserCollection.prototype.distinct  = function (prop, match, options, cb) {
  */
 
 BrowserCollection.prototype.update = function (match, update, options, cb) {
-    this.collection.update(match, update, options, cb);
+  this.collection.update(match, update, options, cb);
 };
 
 /**
@@ -63,7 +64,7 @@ BrowserCollection.prototype.update = function (match, update, options, cb) {
  */
 
 BrowserCollection.prototype.remove = function (match, options, cb) {
-    this.collection.remove(match, options, cb);
+  this.collection.remove(match, options, cb);
 };
 
 /**
@@ -72,7 +73,7 @@ BrowserCollection.prototype.remove = function (match, options, cb) {
  */
 
 BrowserCollection.prototype.findAndModify = function (match, update, options, cb) {
-    this.collection.findAndModify(match, update, options, cb);
+  this.collection.findAndModify(match, update, options, cb);
 };
 
 /**
@@ -80,8 +81,8 @@ BrowserCollection.prototype.findAndModify = function (match, update, options, cb
  * TODO
  */
 
-BrowserCollection.prototype.findStream = function(match, findOptions, streamOptions) {
-    return this.collection.findStream(match, findOptions).stream(streamOptions);
+BrowserCollection.prototype.findStream = function (match, findOptions, streamOptions) {
+  return this.collection.findStream(match, findOptions).stream(streamOptions);
 };
 
 /**
@@ -93,4 +94,4 @@ BrowserCollection.prototype.findStream = function(match, findOptions, streamOpti
  * Expose
  */
 
-export {BrowserCollection};
+exports.BrowserCollection = BrowserCollection;

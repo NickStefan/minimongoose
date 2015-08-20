@@ -1,4 +1,4 @@
-var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
+var MiniMongoose = require('../../build/mini-mongoose').MiniMongoose;
 var Schema = MiniMongoose.Schema;
 
 var MnM = new MiniMongoose({

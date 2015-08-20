@@ -22,11 +22,11 @@ function isOrderedMap(thing){
 	return Boolean(thing instanceof Object && thing['@@__IMMUTABLE_ORDERED__@@'] && thing['@@__IMMUTABLE_MAP__@@']);
 }
 
-module.exports = {
-	isImmutable: isImmutable,
-	isList: isList,
-	isMap: isMap,
-	isSet: isSet,
-	isOrderedSet: isOrderedSet,
-	isOrderedMap: isOrderedMap
+export {
+	isImmutable,
+	isList,
+	isMap,
+	isSet,
+	isOrderedSet,
+	isOrderedMap
 };

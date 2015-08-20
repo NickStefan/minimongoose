@@ -1,8 +1,7 @@
-var _ = require('../lib/lodash');
-var Immutable = require('immutable');
+import * as _ from '../lib/lodash';
 // http://ericwooley.github.io/immutablejs/react/2015/04/01/using-immutablejs/
-var compileSort = require('./selector').compileSort;
-var compileDocumentSelector = require('./selector').compileDocumentSelector;
+import * as Immutable from 'immutable';
+import {compileDocumentSelector, compileSort} from './selector';
 
 function items(){
     return {};
@@ -190,20 +189,18 @@ function populateHashFinderImmutable(items, match, options){
     return query;
 }
 
-// module.exports = {
-// 	finder: finder,
-//     seeder: seeder,
-//     remover: remover,
-//     checker: checker,
-//     populateHashFinder: populateHashFinder,
-//     items: items
-// };
+// finder = finderImmutable;
+// seeder = seederImmutable;
+// remover = removerImmutable;
+// checker = checkerImmutable;
+// populateHashFinder = populateHashFinderImmutable;
+// items = itemsImmutable;
 
-module.exports = {
-    finder: finderImmutable,
-    seeder: seederImmutable,
-    remover: removerImmutable,
-    checker: checkerImmutable,
-    populateHashFinder: populateHashFinderImmutable,
-    items: itemsImmutable
+export {
+    finder,
+    seeder,
+    remover,
+    checker,
+    populateHashFinder,
+    items
 };

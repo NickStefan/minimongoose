@@ -1,15 +1,8 @@
-var _ = require('../lib/lodash');
+import * as _ from '../lib/lodash';
 
-var queryServer = require('./query-server').queryServer;
-
-var finder = require('./engine').finder;
-var seeder = require('./engine').seeder;
-var remover = require('./engine').remover;
-var items = require('./engine').items;
-var checker = require('./engine').checker;
-var populateHashFinder = require('./engine').populateHashFinder;
-
-var FlightManager = require('./flight-manager').FlightManager;
+import {queryServer} from './query-server';
+import {finder, seeder, remover, items, checker, populateHashFinder} from './engine';
+import {FlightManager} from './flight-manager';
 
 function Collection(name, model, options) {
     this.collectionName = name;
@@ -140,6 +133,4 @@ Collection.prototype.insert = function(){
     // no op for now
 };
 
-module.exports = {
-    Collection: Collection
-};
+export {Collection};

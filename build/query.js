@@ -1,50 +1,67 @@
-import * as _ from './lib/lodash'
-import * as helpers from './lib/helpers';
+'use strict';
 
-import mquery from 'mquery';
-import {BrowserCollection} from './browser-collection';
-import {parsePopulatePaths} from './populate';
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+var _libLodash = require('./lib/lodash');
+
+var _ = _interopRequireWildcard(_libLodash);
+
+var _libHelpers = require('./lib/helpers');
+
+var helpers = _interopRequireWildcard(_libHelpers);
+
+var _mquery = require('mquery');
+
+var _mquery2 = _interopRequireDefault(_mquery);
+
+var _browserCollection = require('./browser-collection');
+
+var _populate = require('./populate');
 
 // making mquery work with clientDb collections requires a custom collection class
-mquery.Collection = BrowserCollection;
+_mquery2['default'].Collection = _browserCollection.BrowserCollection;
 
 // straight from mongoose
 function Query(conditions, options, model, collection) {
     // this stuff is for dealing with custom queries created by #toConstructor
     if (!this._mongooseOptions) {
-            this._mongooseOptions = {};
+        this._mongooseOptions = {};
     }
 
     // this is the case where we have a CustomQuery, we need to check if we got
     // options passed in, and if we did, merge them in
     if (options) {
-            var keys = _.keys(options);
-            for (var i=0; i < keys.length; i++) {
-                    var k = keys[i];
-                    this._mongooseOptions[k] = options[k];
-            }
+        var keys = _.keys(options);
+        for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            this._mongooseOptions[k] = options[k];
+        }
     }
 
     if (collection) {
-            this.mongooseCollection = collection;
+        this.mongooseCollection = collection;
     }
 
     if (model) {
-            this.model = model;
-            this.schema = model.schema;
+        this.model = model;
+        this.schema = model.schema;
     }
 
     // this is needed because map reduce returns a model that can be queried, but
     // all of the queries on said model should be lean
     if (this.model && this.model._mapreduce) {
-            this.lean();
+        this.lean();
     }
 
     // inherit mquery
-    mquery.call(this, this.mongooseCollection, options);
+    _mquery2['default'].call(this, this.mongooseCollection, options);
 
     if (conditions) {
-            this.find(conditions);
+        this.find(conditions);
     }
 
     // if (this.schema) {
@@ -61,35 +78,29 @@ function Query(conditions, options, model, collection) {
  * inherit mquery
  */
 
-Query.prototype = new mquery;
+Query.prototype = new _mquery2['default']();
 Query.prototype.constructor = Query;
-Query.prototype.Promise = mquery.Promise;
+Query.prototype.Promise = _mquery2['default'].Promise;
 
-Query.base = mquery.prototype;
-
-// placeholder
-Query.prototype.cast = function(){
-
-}
+Query.base = _mquery2['default'].prototype;
 
 // placeholder
-Query.prototype._applyPaths = function(){
-
-}
+Query.prototype.cast = function () {};
 
 // placeholder
-Query.prototype._castFields = function(){
+Query.prototype._applyPaths = function () {};
 
-}
+// placeholder
+Query.prototype._castFields = function () {};
 
 // straight from mongoose
 Query.prototype.lean = function (v) {
     this._mongooseOptions.lean = arguments.length ? !!v : true;
     return this;
-}
+};
 
 // straight mongoose, but a change for immutability
-Query.prototype._find = function(callback) {
+Query.prototype._find = function (callback) {
     if (this._castError) {
         callback(this._castError);
         return this;
@@ -102,27 +113,23 @@ Query.prototype._find = function(callback) {
     var options = this._mongooseOptions;
     var self = this;
 
-    var cb = function(err, docs) {
+    var cb = function cb(err, docs) {
         if (err) {
             return callback(err);
         }
 
-        if ((helpers.isImmutable(docs) && docs.size === 0) || (!helpers.isImmutable(docs) && docs.length === 0)){
+        if (helpers.isImmutable(docs) && docs.size === 0 || !helpers.isImmutable(docs) && docs.length === 0) {
             return callback(null, docs);
         }
 
         if (!options.populate) {
-            return true === options.lean
-                ? callback(null, docs)
-                : completeMany(self.model, docs, fields, self, null, callback);
+            return true === options.lean ? callback(null, docs) : completeMany(self.model, docs, fields, self, null, callback);
         }
 
         var pop = preparePopulationOptionsMQ(self, options);
         self.model.populate(docs, pop, function (err, docs) {
-            if(err) return callback(err);
-            return true === options.lean
-                ? callback(null, docs)
-                : completeMany(self.model, docs, fields, self, pop, callback);
+            if (err) return callback(err);
+            return true === options.lean ? callback(null, docs) : completeMany(self.model, docs, fields, self, pop, callback);
         });
     };
     // the criteria is an empty object here,
@@ -130,7 +137,6 @@ Query.prototype._find = function(callback) {
     // during earlier this.merge(conditions) calls
     return Query.base.find.call(this, {}, cb);
 };
-
 
 // straight mongoose
 Query.prototype.find = function (conditions, callback) {
@@ -144,7 +150,7 @@ Query.prototype.find = function (conditions, callback) {
     //     conditions = conditions.toObject();
     // }
 
-    if (mquery.canMerge(conditions)) {
+    if (_mquery2['default'].canMerge(conditions)) {
         this.merge(conditions);
     }
 
@@ -165,19 +171,19 @@ Query.prototype.find = function (conditions, callback) {
     this._find(callback);
 
     return this;
-}
+};
 
 // 95% from mongoose (utils.isObject -> _.isObject)
-Query.prototype.populate = function populate (){
-    var res = parsePopulatePaths.apply(null, arguments);
+Query.prototype.populate = function populate() {
+    var res = _populate.parsePopulatePaths.apply(null, arguments);
     var opts = this._mongooseOptions;
 
     if (!_.isObject(opts.populate)) {
-            opts.populate = {};
+        opts.populate = {};
     }
 
     for (var i = 0; i < res.length; ++i) {
-            opts.populate[res[i].path] = res[i];
+        opts.populate[res[i].path] = res[i];
     }
 
     return this;
@@ -194,14 +200,12 @@ Query.prototype.populate = function populate (){
  * @param {Function} callback
  */
 
-function completeMany (model, docs, fields, self, pop, callback) {
+function completeMany(model, docs, fields, self, pop, callback) {
     var arr = [];
     var count = docs.length;
     var len = count;
-    var opts = pop ?
-        { populated: pop }
-        : undefined;
-    for (var i=0; i < len; ++i) {
+    var opts = pop ? { populated: pop } : undefined;
+    for (var i = 0; i < len; ++i) {
         arr[i] = createModel(model, docs[i], fields);
         arr[i].init(docs[i], opts, function (err) {
             if (err) return callback(err);
@@ -211,17 +215,15 @@ function completeMany (model, docs, fields, self, pop, callback) {
 }
 
 // a place holder function for now
-function createModel(model, doc, fields){
+function createModel(model, doc, fields) {
     return doc;
 }
 
 // placeholder
-function prepareDiscriminatorCriteria(){
-
-}
+function prepareDiscriminatorCriteria() {}
 
 // 95% from mongoose (utils.values -> _.values)
-function preparePopulationOptionsMQ (query, options) {
+function preparePopulationOptionsMQ(query, options) {
     var pop = _.values(query._mongooseOptions.populate);
 
     // lean options should trickle through all queries
@@ -231,9 +233,9 @@ function preparePopulationOptionsMQ (query, options) {
 }
 
 // straight mongoose
-function makeLean (option) {
+function makeLean(option) {
     option.options || (option.options = {});
     option.options.lean = true;
 }
 
-export {Query};
+exports.Query = Query;

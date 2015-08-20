@@ -1,4 +1,12 @@
-import * as _ from '../lib/lodash';
+"use strict";
+
+exports.__esModule = true;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
+
+var _libLodash = require('../lib/lodash');
+
+var _ = _interopRequireWildcard(_libLodash);
 
 /*
 ========================================
@@ -72,7 +80,6 @@ var EJSON = {};
  * @instance
  */
 
-
 var customTypes = {};
 // Add a custom type, using a method of your choice to get to and
 // from a basic JSON-able representation.  The factory argument
@@ -93,122 +100,105 @@ var customTypes = {};
  * @param {Function} factory A function that deserializes a JSON-compatible value into an instance of your type.  This should match the serialization performed by your type's `toJSONValue` method.
  */
 EJSON.addType = function (name, factory) {
-    if (_.has(customTypes, name))
-        throw new Error("Type " + name + " already present");
+    if (_.has(customTypes, name)) throw new Error("Type " + name + " already present");
     customTypes[name] = factory;
 };
 
-var isInfOrNan = function (obj) {
+var isInfOrNan = function isInfOrNan(obj) {
     return _.isNaN(obj) || obj === Infinity || obj === -Infinity;
 };
 
-var builtinConverters = [
-    { // Date
-        matchJSONValue: function (obj) {
-            return _.has(obj, '$date') && _.size(obj) === 1;
-        },
-        matchObject: function (obj) {
-            return obj instanceof Date;
-        },
-        toJSONValue: function (obj) {
-            return {$date: obj.getTime()};
-        },
-        fromJSONValue: function (obj) {
-            return new Date(obj.$date);
-        }
+var builtinConverters = [{ // Date
+    matchJSONValue: function matchJSONValue(obj) {
+        return _.has(obj, '$date') && _.size(obj) === 1;
     },
-    { // NaN, Inf, -Inf. (These are the only objects with typeof !== 'object'
-        // which we match.)
-        matchJSONValue: function (obj) {
-            return _.has(obj, '$InfNaN') && _.size(obj) === 1;
-        },
-        matchObject: isInfOrNan,
-        toJSONValue: function (obj) {
-            var sign;
-            if (_.isNaN(obj))
-                sign = 0;
-            else if (obj === Infinity)
-                sign = 1;
-            else
-                sign = -1;
-            return {$InfNaN: sign};
-        },
-        fromJSONValue: function (obj) {
-            return obj.$InfNaN/0;
-        }
+    matchObject: function matchObject(obj) {
+        return obj instanceof Date;
     },
-    { // Binary
-        matchJSONValue: function (obj) {
-            return _.has(obj, '$binary') && _.size(obj) === 1;
-        },
-        matchObject: function (obj) {
-            return typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array
-                || (obj && _.has(obj, '$Uint8ArrayPolyfill'));
-        },
-        toJSONValue: function (obj) {
-            return {$binary: Base64.encode(obj)};
-        },
-        fromJSONValue: function (obj) {
-            return Base64.decode(obj.$binary);
-        }
+    toJSONValue: function toJSONValue(obj) {
+        return { $date: obj.getTime() };
     },
-    { // Escaping one level
-        matchJSONValue: function (obj) {
-            return _.has(obj, '$escape') && _.size(obj) === 1;
-        },
-        matchObject: function (obj) {
-            if (_.isEmpty(obj) || _.size(obj) > 2) {
-                return false;
-            }
-            return _.any(builtinConverters, function (converter) {
-                return converter.matchJSONValue(obj);
-            });
-        },
-        toJSONValue: function (obj) {
-            var newObj = {};
-            _.each(obj, function (value, key) {
-                newObj[key] = EJSON.toJSONValue(value);
-            });
-            return {$escape: newObj};
-        },
-        fromJSONValue: function (obj) {
-            var newObj = {};
-            _.each(obj.$escape, function (value, key) {
-                newObj[key] = EJSON.fromJSONValue(value);
-            });
-            return newObj;
-        }
-    },
-    { // Custom
-        matchJSONValue: function (obj) {
-            return _.has(obj, '$type') && _.has(obj, '$value') && _.size(obj) === 2;
-        },
-        matchObject: function (obj) {
-            return EJSON._isCustomType(obj);
-        },
-        toJSONValue: function (obj) {
-            var jsonValue = Meteor._noYieldsAllowed(function () {
-                return obj.toJSONValue();
-            });
-            return {$type: obj.typeName(), $value: jsonValue};
-        },
-        fromJSONValue: function (obj) {
-            var typeName = obj.$type;
-            if (!_.has(customTypes, typeName))
-                throw new Error("Custom EJSON type " + typeName + " is not defined");
-            var converter = customTypes[typeName];
-            return Meteor._noYieldsAllowed(function () {
-                return converter(obj.$value);
-            });
-        }
+    fromJSONValue: function fromJSONValue(obj) {
+        return new Date(obj.$date);
     }
-];
+}, { // NaN, Inf, -Inf. (These are the only objects with typeof !== 'object'
+    // which we match.)
+    matchJSONValue: function matchJSONValue(obj) {
+        return _.has(obj, '$InfNaN') && _.size(obj) === 1;
+    },
+    matchObject: isInfOrNan,
+    toJSONValue: function toJSONValue(obj) {
+        var sign;
+        if (_.isNaN(obj)) sign = 0;else if (obj === Infinity) sign = 1;else sign = -1;
+        return { $InfNaN: sign };
+    },
+    fromJSONValue: function fromJSONValue(obj) {
+        return obj.$InfNaN / 0;
+    }
+}, { // Binary
+    matchJSONValue: function matchJSONValue(obj) {
+        return _.has(obj, '$binary') && _.size(obj) === 1;
+    },
+    matchObject: function matchObject(obj) {
+        return typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array || obj && _.has(obj, '$Uint8ArrayPolyfill');
+    },
+    toJSONValue: function toJSONValue(obj) {
+        return { $binary: Base64.encode(obj) };
+    },
+    fromJSONValue: function fromJSONValue(obj) {
+        return Base64.decode(obj.$binary);
+    }
+}, { // Escaping one level
+    matchJSONValue: function matchJSONValue(obj) {
+        return _.has(obj, '$escape') && _.size(obj) === 1;
+    },
+    matchObject: function matchObject(obj) {
+        if (_.isEmpty(obj) || _.size(obj) > 2) {
+            return false;
+        }
+        return _.any(builtinConverters, function (converter) {
+            return converter.matchJSONValue(obj);
+        });
+    },
+    toJSONValue: function toJSONValue(obj) {
+        var newObj = {};
+        _.each(obj, function (value, key) {
+            newObj[key] = EJSON.toJSONValue(value);
+        });
+        return { $escape: newObj };
+    },
+    fromJSONValue: function fromJSONValue(obj) {
+        var newObj = {};
+        _.each(obj.$escape, function (value, key) {
+            newObj[key] = EJSON.fromJSONValue(value);
+        });
+        return newObj;
+    }
+}, { // Custom
+    matchJSONValue: function matchJSONValue(obj) {
+        return _.has(obj, '$type') && _.has(obj, '$value') && _.size(obj) === 2;
+    },
+    matchObject: function matchObject(obj) {
+        return EJSON._isCustomType(obj);
+    },
+    toJSONValue: function toJSONValue(obj) {
+        var jsonValue = Meteor._noYieldsAllowed(function () {
+            return obj.toJSONValue();
+        });
+        return { $type: obj.typeName(), $value: jsonValue };
+    },
+    fromJSONValue: function fromJSONValue(obj) {
+        var typeName = obj.$type;
+        if (!_.has(customTypes, typeName)) throw new Error("Custom EJSON type " + typeName + " is not defined");
+        var converter = customTypes[typeName];
+        return Meteor._noYieldsAllowed(function () {
+            return converter(obj.$value);
+        });
+    }
+}];
 
 EJSON._isCustomType = function (obj) {
-    return obj &&
-        typeof obj.toJSONValue === 'function' &&
-        typeof obj.typeName === 'function' &&
-        _.has(customTypes, obj.typeName());
+    return obj && typeof obj.toJSONValue === 'function' && typeof obj.typeName === 'function' && _.has(customTypes, obj.typeName());
 };
 
 EJSON._getTypes = function () {
@@ -220,24 +210,18 @@ EJSON._getConverters = function () {
 };
 
 // for both arrays and objects, in-place modification.
-var adjustTypesToJSONValue =
-EJSON._adjustTypesToJSONValue = function (obj) {
+var adjustTypesToJSONValue = EJSON._adjustTypesToJSONValue = function (obj) {
     // Is it an atom that we need to adjust?
-    if (obj === null)
-        return null;
+    if (obj === null) return null;
     var maybeChanged = toJSONValueHelper(obj);
-    if (maybeChanged !== undefined)
-        return maybeChanged;
+    if (maybeChanged !== undefined) return maybeChanged;
 
     // Other atoms are unchanged.
-    if (typeof obj !== 'object')
-        return obj;
+    if (typeof obj !== 'object') return obj;
 
     // Iterate over array or object structure.
     _.each(obj, function (value, key) {
-        if (typeof value !== 'object' && value !== undefined &&
-                !isInfOrNan(value))
-            return; // continue
+        if (typeof value !== 'object' && value !== undefined && !isInfOrNan(value)) return; // continue
 
         var changed = toJSONValueHelper(value);
         if (changed) {
@@ -253,7 +237,7 @@ EJSON._adjustTypesToJSONValue = function (obj) {
 
 // Either return the JSON-compatible version of the argument, or undefined (if
 // the item isn't itself replaceable, but maybe some fields in it are)
-var toJSONValueHelper = function (item) {
+var toJSONValueHelper = function toJSONValueHelper(item) {
     for (var i = 0; i < builtinConverters.length; i++) {
         var converter = builtinConverters[i];
         if (converter.matchObject(item)) {
@@ -270,8 +254,7 @@ var toJSONValueHelper = function (item) {
  */
 EJSON.toJSONValue = function (item) {
     var changed = toJSONValueHelper(item);
-    if (changed !== undefined)
-        return changed;
+    if (changed !== undefined) return changed;
     if (typeof item === 'object') {
         item = EJSON.clone(item);
         adjustTypesToJSONValue(item);
@@ -283,17 +266,13 @@ EJSON.toJSONValue = function (item) {
 // use the object you hand it, but may return something
 // different if the object you hand it itself needs changing.
 //
-var adjustTypesFromJSONValue =
-EJSON._adjustTypesFromJSONValue = function (obj) {
-    if (obj === null)
-        return null;
+var adjustTypesFromJSONValue = EJSON._adjustTypesFromJSONValue = function (obj) {
+    if (obj === null) return null;
     var maybeChanged = fromJSONValueHelper(obj);
-    if (maybeChanged !== obj)
-        return maybeChanged;
+    if (maybeChanged !== obj) return maybeChanged;
 
     // Other atoms are unchanged.
-    if (typeof obj !== 'object')
-        return obj;
+    if (typeof obj !== 'object') return obj;
 
     _.each(obj, function (value, key) {
         if (typeof value === 'object') {
@@ -315,12 +294,11 @@ EJSON._adjustTypesFromJSONValue = function (obj) {
 
 // DOES NOT RECURSE.  For actually getting the fully-changed value, use
 // EJSON.fromJSONValue
-var fromJSONValueHelper = function (value) {
+var fromJSONValueHelper = function fromJSONValueHelper(value) {
     if (typeof value === 'object' && value !== null) {
-        if (_.size(value) <= 2
-                && _.all(value, function (v, k) {
-                    return typeof k === 'string' && k.substr(0, 1) === '$';
-                })) {
+        if (_.size(value) <= 2 && _.all(value, function (v, k) {
+            return typeof k === 'string' && k.substr(0, 1) === '$';
+        })) {
             for (var i = 0; i < builtinConverters.length; i++) {
                 var converter = builtinConverters[i];
                 if (converter.matchJSONValue(value)) {
@@ -372,8 +350,7 @@ EJSON.stringify = function (item, options) {
  * @param {String} str A string to parse into an EJSON value.
  */
 EJSON.parse = function (item) {
-    if (typeof item !== 'string')
-        throw new Error("EJSON.parse argument should be a string");
+    if (typeof item !== 'string') throw new Error("EJSON.parse argument should be a string");
     return EJSON.fromJSONValue(JSON.parse(item));
 };
 
@@ -383,8 +360,7 @@ EJSON.parse = function (item) {
  * @locus Anywhere
  */
 EJSON.isBinary = function (obj) {
-    return !!((typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array) ||
-        (obj && obj.$Uint8ArrayPolyfill));
+    return !!(typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array || obj && obj.$Uint8ArrayPolyfill);
 };
 
 /**
@@ -398,52 +374,43 @@ EJSON.isBinary = function (obj) {
 EJSON.equals = function (a, b, options) {
     var i;
     var keyOrderSensitive = !!(options && options.keyOrderSensitive);
-    if (a === b)
-        return true;
-    if (_.isNaN(a) && _.isNaN(b))
-        return true; // This differs from the IEEE spec for NaN equality, b/c we don't want
-                                 // anything ever with a NaN to be poisoned from becoming equal to anything.
+    if (a === b) return true;
+    if (_.isNaN(a) && _.isNaN(b)) return true; // This differs from the IEEE spec for NaN equality, b/c we don't want
+    // anything ever with a NaN to be poisoned from becoming equal to anything.
     if (!a || !b) // if either one is falsy, they'd have to be === to be equal
         return false;
-    if (!(typeof a === 'object' && typeof b === 'object'))
-        return false;
-    if (a instanceof Date && b instanceof Date)
-        return a.valueOf() === b.valueOf();
+    if (!(typeof a === 'object' && typeof b === 'object')) return false;
+    if (a instanceof Date && b instanceof Date) return a.valueOf() === b.valueOf();
     if (EJSON.isBinary(a) && EJSON.isBinary(b)) {
-        if (a.length !== b.length)
-            return false;
+        if (a.length !== b.length) return false;
         for (i = 0; i < a.length; i++) {
-            if (a[i] !== b[i])
-                return false;
+            if (a[i] !== b[i]) return false;
         }
         return true;
     }
-    if (typeof (a.equals) === 'function')
-        return a.equals(b, options);
-    if (typeof (b.equals) === 'function')
-        return b.equals(a, options);
+    if (typeof a.equals === 'function') return a.equals(b, options);
+    if (typeof b.equals === 'function') return b.equals(a, options);
     if (a instanceof Array) {
-        if (!(b instanceof Array))
-            return false;
-        if (a.length !== b.length)
-            return false;
+        if (!(b instanceof Array)) return false;
+        if (a.length !== b.length) return false;
         for (i = 0; i < a.length; i++) {
-            if (!EJSON.equals(a[i], b[i], options))
-                return false;
+            if (!EJSON.equals(a[i], b[i], options)) return false;
         }
         return true;
     }
     // fallback for custom types that don't implement their own equals
     switch (EJSON._isCustomType(a) + EJSON._isCustomType(b)) {
-        case 1: return false;
-        case 2: return EJSON.equals(EJSON.toJSONValue(a), EJSON.toJSONValue(b));
+        case 1:
+            return false;
+        case 2:
+            return EJSON.equals(EJSON.toJSONValue(a), EJSON.toJSONValue(b));
     }
     // fall back to structural equality of objects
     var ret;
     if (keyOrderSensitive) {
         var bKeys = [];
         _.each(b, function (val, x) {
-                bKeys.push(x);
+            bKeys.push(x);
         });
         i = 0;
         ret = _.all(a, function (val, x) {
@@ -483,16 +450,12 @@ EJSON.equals = function (a, b, options) {
  */
 EJSON.clone = function (v) {
     var ret;
-    if (typeof v !== "object")
-        return v;
-    if (v === null)
-        return null; // null has typeof "object"
-    if (v instanceof Date)
-        return new Date(v.getTime());
+    if (typeof v !== "object") return v;
+    if (v === null) return null; // null has typeof "object"
+    if (v instanceof Date) return new Date(v.getTime());
     // RegExps are not really EJSON elements (eg we don't define a serialization
     // for them), but they're immutable anyway, so we can support them in clone.
-    if (v instanceof RegExp)
-        return v;
+    if (v instanceof RegExp) return v;
     if (EJSON.isBinary(v)) {
         ret = EJSON.newBinary(v.length);
         for (var i = 0; i < v.length; i++) {
@@ -505,8 +468,7 @@ EJSON.clone = function (v) {
         // For some reason, _.map doesn't work in this context on Opera (weird test
         // failures).
         ret = [];
-        for (i = 0; i < v.length; i++)
-            ret[i] = EJSON.clone(v[i]);
+        for (i = 0; i < v.length; i++) ret[i] = EJSON.clone(v[i]);
         return ret;
     }
     // handle general user-defined typed Objects if they have a clone method
@@ -525,4 +487,4 @@ EJSON.clone = function (v) {
     return ret;
 };
 
-export {EJSON};
+exports.EJSON = EJSON;

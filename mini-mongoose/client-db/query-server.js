@@ -1,6 +1,7 @@
-var EJSON = require('./EJSON');
-var request = require('jquery');
-var _ = require('../lib/lodash');
+import * as _ from '../lib/lodash';
+import * as request from 'jquery';
+
+import {EJSON} from './EJSON';
 
 function prepareParams(match, options){
     match = match || {};
@@ -65,6 +66,4 @@ function queryServer(collection, match, options, cb){
     }
 }
 
-module.exports = {
-	queryServer: queryServer
-};
+export {queryServer};

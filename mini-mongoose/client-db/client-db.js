@@ -1,6 +1,6 @@
-var _ = require('../lib/lodash');
+import * as _ from '../lib/lodash';
 
-var Collection = require('./collection').Collection;
+import {Collection} from './collection';
 
 function ClientDb() {
     this.collections = {};
@@ -20,6 +20,4 @@ ClientDb.prototype.empty = function(){
 	});
 };
 
-module.exports = {
-    ClientDb: ClientDb,
-}
+export {ClientDb};

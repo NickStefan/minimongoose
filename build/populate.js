@@ -1,7 +1,15 @@
-import * as _ from './lib/lodash';
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+var _libLodash = require('./lib/lodash');
+
+var _ = _interopRequireWildcard(_libLodash);
 
 // 95% from mongoose (utils.isObject -> _.isObject)
-function parsePopulatePaths (path, select, model, match, options, subPopulate) {
+function parsePopulatePaths(path, select, model, match, options, subPopulate) {
     // The order of select/conditions args is opposite Model.find but
     // necessary to keep backward compatibility (select could be
     // an array, string, or object literal).
@@ -13,7 +21,7 @@ function parsePopulatePaths (path, select, model, match, options, subPopulate) {
         }
 
         if (_.isArray(path)) {
-            return path.map(function(o){
+            return path.map(function (o) {
                 return parsePopulatePaths(o)[0];
             });
         }
@@ -50,7 +58,7 @@ function parsePopulatePaths (path, select, model, match, options, subPopulate) {
 }
 
 // straight from mongoose
-function PopulateOptions (path, select, match, options, model, subPopulate) {
+function PopulateOptions(path, select, match, options, model, subPopulate) {
     this.path = path;
     this.match = match;
     this.select = select;
@@ -62,4 +70,4 @@ function PopulateOptions (path, select, match, options, model, subPopulate) {
     this._docs = {};
 }
 
-export {parsePopulatePaths};
+exports.parsePopulatePaths = parsePopulatePaths;

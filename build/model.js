@@ -1,10 +1,26 @@
-import * as _ from './lib/lodash';
-import * as helpers from './lib/helpers';
-import * as Immutable from 'immutable';
-import {parsePopulatePaths} from './populate';
-import {Query} from './query';
+'use strict';
 
-function Model(minimongoose, db, modelName, schema, options){
+exports.__esModule = true;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+var _libLodash = require('./lib/lodash');
+
+var _ = _interopRequireWildcard(_libLodash);
+
+var _libHelpers = require('./lib/helpers');
+
+var helpers = _interopRequireWildcard(_libHelpers);
+
+var _immutable = require('immutable');
+
+var Immutable = _interopRequireWildcard(_immutable);
+
+var _populate = require('./populate');
+
+var _query = require('./query');
+
+function Model(minimongoose, db, modelName, schema, options) {
     options = options || {};
     options.resource = options.resource || "";
     options.resourcePrefix = options.resourcePrefix || true;
@@ -32,73 +48,71 @@ function Model(minimongoose, db, modelName, schema, options){
 }
 
 // placeholder
-Model.prototype.init = function(){
+Model.prototype.init = function () {};
 
-}
-
-Model.prototype._getSchema = function(path){
+Model.prototype._getSchema = function (path) {
     var schema = this.schema;
     var pathschema = schema.path(path);
 
     if (pathschema) return pathschema;
 
-// look for arrays
-// return (function search (parts, schema) {
-//   var p = parts.length + 1
-//     , foundschema
-//     , trypath
+    // look for arrays
+    // return (function search (parts, schema) {
+    //   var p = parts.length + 1
+    //     , foundschema
+    //     , trypath
 
-//   while (p--) {
-//     trypath = parts.slice(0, p).join('.');
-//     foundschema = schema.path(trypath);
-//     if (foundschema) {
-//       if (foundschema.caster) {
+    //   while (p--) {
+    //     trypath = parts.slice(0, p).join('.');
+    //     foundschema = schema.path(trypath);
+    //     if (foundschema) {
+    //       if (foundschema.caster) {
 
-//         // array of Mixed?
-//         if (foundschema.caster instanceof Types.Mixed) {
-//           return foundschema.caster;
-//         }
+    //         // array of Mixed?
+    //         if (foundschema.caster instanceof Types.Mixed) {
+    //           return foundschema.caster;
+    //         }
 
-//         // Now that we found the array, we need to check if there
-//         // are remaining document paths to look up for casting.
-//         // Also we need to handle array.$.path since schema.path
-//         // doesn't work for that.
-//         // If there is no foundschema.schema we are dealing with
-//         // a path like array.$
-//         if (p !== parts.length && foundschema.schema) {
-//           if ('$' === parts[p]) {
-//             // comments.$.comments.$.title
-//             return search(parts.slice(p+1), foundschema.schema);
-//           } else {
-//             // this is the last path of the selector
-//             return search(parts.slice(p), foundschema.schema);
-//           }
-//         }
-//       }
-//       return foundschema;
-//     }
-//   }
-// })(path.split('.'), schema)
-}
+    //         // Now that we found the array, we need to check if there
+    //         // are remaining document paths to look up for casting.
+    //         // Also we need to handle array.$.path since schema.path
+    //         // doesn't work for that.
+    //         // If there is no foundschema.schema we are dealing with
+    //         // a path like array.$
+    //         if (p !== parts.length && foundschema.schema) {
+    //           if ('$' === parts[p]) {
+    //             // comments.$.comments.$.title
+    //             return search(parts.slice(p+1), foundschema.schema);
+    //           } else {
+    //             // this is the last path of the selector
+    //             return search(parts.slice(p), foundschema.schema);
+    //           }
+    //         }
+    //       }
+    //       return foundschema;
+    //     }
+    //   }
+    // })(path.split('.'), schema)
+};
 
 // 95% mongoose
-Model.prototype.find = function(conditions, projection, options, callback) {
+Model.prototype.find = function (conditions, projection, options, callback) {
     if ('function' == typeof conditions) {
-            callback = conditions;
-            conditions = {};
-            projection = null;
-            options = null;
+        callback = conditions;
+        conditions = {};
+        projection = null;
+        options = null;
     } else if ('function' == typeof projection) {
-            callback = projection;
-            projection = null;
-            options = null;
+        callback = projection;
+        projection = null;
+        options = null;
     } else if ('function' == typeof options) {
-            callback = options;
-            options = null;
+        callback = options;
+        options = null;
     }
 
     // get the clientDb collection object
-    var mq = new Query({}, options, this, this.collection);
+    var mq = new _query.Query({}, options, this, this.collection);
 
     // TODO
     // mq.select(projection);
@@ -109,28 +123,28 @@ Model.prototype.find = function(conditions, projection, options, callback) {
 };
 
 // 95% mongoose
-Model.prototype.findById = function findById (id, projection, options, callback) {
+Model.prototype.findById = function findById(id, projection, options, callback) {
     return this.findOne({ _id: id }, projection, options, callback);
 };
 
 // 95% mongoose
-Model.prototype.findOne = function findOne (conditions, projection, options, callback) {
+Model.prototype.findOne = function findOne(conditions, projection, options, callback) {
     if ('function' == typeof options) {
-            callback = options;
-            options = null;
+        callback = options;
+        options = null;
     } else if ('function' == typeof projection) {
-            callback = projection;
-            projection = null;
-            options = null;
+        callback = projection;
+        projection = null;
+        options = null;
     } else if ('function' == typeof conditions) {
-            callback = conditions;
-            conditions = {};
-            projection = null;
-            options = null;
+        callback = conditions;
+        conditions = {};
+        projection = null;
+        options = null;
     }
 
     // get the clientDb collection object
-    var mq = new Query({}, options, this, this.collection);
+    var mq = new _query.Query({}, options, this, this.collection);
 
     // TODO
     // mq.select(projection);
@@ -142,19 +156,19 @@ Model.prototype.findOne = function findOne (conditions, projection, options, cal
 };
 
 // 100% mongoose
-Model.prototype.count = function count (conditions, callback) {
+Model.prototype.count = function count(conditions, callback) {
     if ('function' === typeof conditions) callback = conditions, conditions = {};
 
     // get the clientDb collection object
-    var mq = new Query({}, {}, this, this.collection);
+    var mq = new _query.Query({}, {}, this, this.collection);
 
     return mq.count(conditions, callback);
 };
 
 // 100% mongoose
-Model.prototype.where = function where (path, val) {
+Model.prototype.where = function where(path, val) {
     // get the clientDb collection object
-    var mq = new Query({}, {}, this, this.collection).find({});
+    var mq = new _query.Query({}, {}, this, this.collection).find({});
     return mq.where.apply(mq, arguments);
 };
 
@@ -166,7 +180,7 @@ Model.prototype.where = function where (path, val) {
 
 Model.prototype.populate = function (docs, paths, cb) {
     // normalized paths
-    var paths = parsePopulatePaths(paths);
+    var paths = _populate.parsePopulatePaths(paths);
     var pending = paths.length;
 
     if (0 === pending) {
@@ -183,12 +197,12 @@ Model.prototype.populate = function (docs, paths, cb) {
         populate(model, docs, path, subPopulate.call(model, docs, path, next));
     }
 
-    function next (err, docs){
+    function next(err, docs) {
         if (err) return cb(err);
         if (--pending) return;
         cb(null, docs);
     }
-}
+};
 
 /*!
  * Populates deeply if `populate` option is present.
@@ -199,9 +213,9 @@ Model.prototype.populate = function (docs, paths, cb) {
  * @return {Function}
  * @api private
  */
-function subPopulate (docs, options, cb) {
+function subPopulate(docs, options, cb) {
     var model = this;
-    var prefix = options.path+'.';
+    var prefix = options.path + '.';
     var pop = options.populate;
 
     if (!pop) {
@@ -213,10 +227,10 @@ function subPopulate (docs, options, cb) {
         pop = [pop];
     }
 
-    return function (err, docs){
+    return function (err, docs) {
         var pending = pop.length;
 
-        function next (err, docs){
+        function next(err, docs) {
             if (err) return cb(err);
             if (--pending) return;
             cb(null, docs);
@@ -228,7 +242,7 @@ function subPopulate (docs, options, cb) {
             // path needs parent's path prefixed to it
             if (!subOptions._originalPath) {
                 subOptions._originalPath = subOptions.path;
-                subOptions.path = prefix+subOptions.path;
+                subOptions.path = prefix + subOptions.path;
             }
             if (typeof subOptions.model === 'string') {
                 subOptions.model = model.model(subOptions.model);
@@ -238,8 +252,8 @@ function subPopulate (docs, options, cb) {
     };
 }
 
-function isNullOrUndefined (doc){
-    return helpers.isImmutable(doc) ? doc.size === 0 : ((doc === null) || (doc === undefined));
+function isNullOrUndefined(doc) {
+    return helpers.isImmutable(doc) ? doc.size === 0 : doc === null || doc === undefined;
 }
 
 /*!
@@ -252,15 +266,15 @@ function populate(model, docs, options, cb) {
     var modelsMap, rawIds;
 
     // normalize single / multiple docs passed
-    if (helpers.isImmutable(docs) && !helpers.isOrderedMap(docs)){
+    if (helpers.isImmutable(docs) && !helpers.isOrderedMap(docs)) {
         var obj = {};
-        obj[ docs.get('_id') ] = docs;
+        obj[docs.get('_id')] = docs;
         docs = Immutable.OrderedMap(obj);
     } else if (!helpers.isImmutable(docs) && !_.isArray(docs)) {
         docs = [docs];
     }
 
-    if (helpers.isImmutable(docs) && (docs.size === 0 || docs.every(isNullOrUndefined))){
+    if (helpers.isImmutable(docs) && (docs.size === 0 || docs.every(isNullOrUndefined))) {
         return cb();
     } else if (!helpers.isImmutable(docs) && (0 === docs.length || _.every(docs, isNullOrUndefined))) {
         return cb();
@@ -269,8 +283,13 @@ function populate(model, docs, options, cb) {
     modelsMap = getModelsMapForPopulate(model, docs, options);
     rawIds = getIdsForAndAddIdsInMapPopulate(modelsMap);
 
-    var i, len = modelsMap.length,
-        mod, match, select, promise, vals = [];
+    var i,
+        len = modelsMap.length,
+        mod,
+        match,
+        select,
+        promise,
+        vals = [];
 
     var _remaining = len;
     for (i = 0; i < len; i++) {
@@ -283,14 +302,10 @@ function populate(model, docs, options, cb) {
             match = {};
         }
 
-        var ids = _.chain(mod.ids)
-        .flatten()
-        .filter(function(item) {
+        var ids = _.chain(mod.ids).flatten().filter(function (item) {
             // no need to include undefined values in our query
             return undefined !== item;
-        })
-        .uniq()
-        .value();
+        }).uniq().value();
 
         if (0 === ids.length || _.every(ids, isNullOrUndefined)) {
             return cb();
@@ -302,7 +317,7 @@ function populate(model, docs, options, cb) {
 
         var assignmentOpts = {};
         assignmentOpts.sort = mod.options.options && mod.options.options.sort || undefined;
-        assignmentOpts.excludeId = excludeIdReg.test(select) || (select && 0 === select._id);
+        assignmentOpts.excludeId = excludeIdReg.test(select) || select && 0 === select._id;
 
         if (assignmentOpts.excludeId) {
             // override the exclusion from the query so we can use the _id
@@ -328,7 +343,7 @@ function populate(model, docs, options, cb) {
 
     function next(options, assignmentOpts, err, valsFromDb) {
         if (err) return resolved(err);
-        if (helpers.isImmutable(valsFromDb)){
+        if (helpers.isImmutable(valsFromDb)) {
             vals = valsFromDb;
         } else {
             //vals = vals.concat(valsFromDb);
@@ -343,9 +358,12 @@ function populate(model, docs, options, cb) {
         if (err) return cb(err);
 
         var lean = options.options && options.options.lean,
-            rawOrder = {}, rawDocs = {}, key, val;
+            rawOrder = {},
+            rawDocs = {},
+            key,
+            val;
 
-        if (helpers.isImmutable(vals)){
+        if (helpers.isImmutable(vals)) {
             rawDocs = vals;
         } else {
             //_.forEach(vals, iterateDocs);
@@ -355,7 +373,7 @@ function populate(model, docs, options, cb) {
         // optimization:
         // record the document positions as returned by
         // the query result.
-        function iterateDocs(doc, i){
+        function iterateDocs(doc, i) {
             var key = helpers.isImmutable(doc) ? String(doc.get('_id')) : String(doc._id);
             rawDocs[key] = doc;
             rawOrder[key] = i;
@@ -380,21 +398,28 @@ function getModelsMapForPopulate(model, docs, options) {
     var available = {},
         map = [],
         modelNameFromQuery = options.model && options.model.modelName || options.model,
-        schema, refPath, Model, currentOptions, modelNames, modelName, discriminatorKey, modelForFindSchema;
+        schema,
+        refPath,
+        Model,
+        currentOptions,
+        modelNames,
+        modelName,
+        discriminatorKey,
+        modelForFindSchema;
 
     schema = model._getSchema(options.path);
 
-    if(schema && schema.caster){
+    if (schema && schema.caster) {
         schema = schema.caster;
     }
 
-    if (!schema && model.discriminators){
-        discriminatorKey = model.schema.discriminatorMapping.key
+    if (!schema && model.discriminators) {
+        discriminatorKey = model.schema.discriminatorMapping.key;
     }
 
     refPath = schema && schema.options && schema.options.refPath;
 
-    if (helpers.isImmutable(docs)){
+    if (helpers.isImmutable(docs)) {
         docs.forEach(iterateDocs);
     } else {
         _.forEach(docs, iterateDocs);
@@ -403,37 +428,35 @@ function getModelsMapForPopulate(model, docs, options) {
     return map;
 
     function iterateDocs(doc) {
-        if(refPath){
+        if (refPath) {
             modelNames = _.result(doc, refPath); //utils.getValue(refPath, doc);
-        }else{
-            if(!modelNameFromQuery){
-                var schemaForCurrentDoc;
+        } else {
+                if (!modelNameFromQuery) {
+                    var schemaForCurrentDoc;
 
-                if(!schema && discriminatorKey){
-                    modelForFindSchema = utils.getValue(discriminatorKey, doc);
+                    if (!schema && discriminatorKey) {
+                        modelForFindSchema = utils.getValue(discriminatorKey, doc);
 
-                    if(modelForFindSchema){
-                        schemaForCurrentDoc = model.db.model(modelForFindSchema)._getSchema(options.path);
+                        if (modelForFindSchema) {
+                            schemaForCurrentDoc = model.db.model(modelForFindSchema)._getSchema(options.path);
 
-                        if(schemaForCurrentDoc && schemaForCurrentDoc.caster){
-                            schemaForCurrentDoc = schemaForCurrentDoc.caster;
+                            if (schemaForCurrentDoc && schemaForCurrentDoc.caster) {
+                                schemaForCurrentDoc = schemaForCurrentDoc.caster;
+                            }
                         }
+                    } else {
+                        schemaForCurrentDoc = schema;
                     }
+
+                    modelNames = [schemaForCurrentDoc && schemaForCurrentDoc.options && schemaForCurrentDoc.options.ref // declared in schema
+                     || model.modelName // an ad-hoc structure
+                    ];
                 } else {
-                    schemaForCurrentDoc = schema;
-                }
-
-                modelNames = [
-                    schemaForCurrentDoc && schemaForCurrentDoc.options && schemaForCurrentDoc.options.ref            // declared in schema
-                    || model.modelName                                           // an ad-hoc structure
-                ]
-            }else{
-                modelNames = [modelNameFromQuery];  // query options
+                        modelNames = [modelNameFromQuery]; // query options
+                    }
             }
-        }
 
-        if (!modelNames)
-            return;
+        if (!modelNames) return;
 
         if (!_.isArray(modelNames)) {
             modelNames = [modelNames];
@@ -448,7 +471,7 @@ function getModelsMapForPopulate(model, docs, options) {
                     model: Model
                 };
 
-                if(schema && !discriminatorKey){
+                if (schema && !discriminatorKey) {
                     options.model = Model;
                 }
 
@@ -464,15 +487,26 @@ function getModelsMapForPopulate(model, docs, options) {
             } else {
                 available[modelName].docs.push(doc);
             }
-
         }
     }
 }
 
 function getIdsForAndAddIdsInMapPopulate(modelsMap) {
-    var rawIds = [] // for the correct position
-        ,
-        i, j, doc, docs, id, len, len2, ret, isDocument, populated, options, path;
+    var rawIds = [],
+        // for the correct position
+
+    i,
+        j,
+        doc,
+        docs,
+        id,
+        len,
+        len2,
+        ret,
+        isDocument,
+        populated,
+        options,
+        path;
 
     len2 = modelsMap.length;
     for (j = 0; j < len2; j++) {
@@ -485,7 +519,7 @@ function getIdsForAndAddIdsInMapPopulate(modelsMap) {
             ret = undefined;
             doc = docs[i];
             id = helpers.isImmutable(doc) ? String(doc.get('_id')) : String(_.result(doc, "_id"));
-            isDocument = !! doc.$__;
+            isDocument = !!doc.$__;
 
             if (!ret || Array.isArray(ret) && 0 === ret.length) {
                 ret = helpers.isImmutable(doc) ? doc.get(path) : _.result(doc, path);
@@ -517,7 +551,7 @@ function getIdsForAndAddIdsInMapPopulate(modelsMap) {
  * @return {Array|Document|Any}
  */
 
-function convertTo_id (val) {
+function convertTo_id(val) {
     if (val instanceof Model) return val._id;
 
     if (Array.isArray(val)) {
@@ -536,7 +570,7 @@ function convertTo_id (val) {
  * Assigns documents returned from a population query back
  * to the original document path.
  */
-function assignVals (o) {
+function assignVals(o) {
     // replace the original ids in our intermediate _ids structure
     // with the documents found by query
 
@@ -553,7 +587,7 @@ function assignVals (o) {
     var rawDocs = o.rawDocs;
     var options = o.options;
 
-    if (helpers.isImmutable(docs)){
+    if (helpers.isImmutable(docs)) {
         docs.forEach(iterateImmutableDocs);
     } else {
         _.forEach(docs, iterateDocs);
@@ -561,7 +595,7 @@ function assignVals (o) {
 
     return docs;
 
-    function iterateDocs(doc, i){
+    function iterateDocs(doc, i) {
         if (_.result(doc, path) === null || _.result(doc, path) === undefined) return;
         //doc[path] = rawIds[i];
 
@@ -572,7 +606,7 @@ function assignVals (o) {
         // });
     }
 
-    function iterateImmutableDocs(doc, key){
+    function iterateImmutableDocs(doc, key) {
         if (doc.get(path) === null || doc.get(path) === undefined) return;
         var updatedDoc = doc.set(path, rawDocs.get(doc.get(path)));
         docs = docs.set(key, updatedDoc);
@@ -660,4 +694,4 @@ function assignVals (o) {
 //         });
 //     }
 // }
-export {Model};
+exports.Model = Model;

@@ -4,7 +4,6 @@ var router = express.Router();
 /* GET home page. */
 router.get('/', function(req, res) {
 
-
     req.MnM.models.Car
     .find({name:'Mustang'})
     //.populate({path: 'brand', model: 'Brand'})
@@ -14,9 +13,10 @@ router.get('/', function(req, res) {
     .exec(function(err, results){
         res.render('index', {
             cache: false,
-            title: 'minimongoose'
+            title: 'minimongoose',
+            results: results
         });
-        //console.log(results.toList().toJS());
+        console.log('bob', results);
     });
 
 });

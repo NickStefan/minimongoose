@@ -1,5 +1,5 @@
-var _ = require('../lib/lodash');
-var EJSON = require('./EJSON');
+import * as _ from '../lib/lodash';
+import {EJSON} from './EJSON';
 
 function FlightManager (){
 	this.queries = {};
@@ -41,7 +41,4 @@ FlightManager.prototype.resolveFlight = function(qry){
     this.queries[qry] = true;
 };
 
-
-module.exports = {
-	FlightManager: FlightManager
-};
+export {FlightManager};

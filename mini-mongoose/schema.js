@@ -1,5 +1,2 @@
-var Schema = require('mongoose').Schema;
-
-module.exports = {
-	Schema: Schema
-};
+import {Schema} from 'mongoose';
+export {Schema};

@@ -1,13 +1,13 @@
-var clientDb = require('./client-db/client-db');
-var Model = require('./model').Model;
-var Schema = require('./schema').Schema;
+import {ClientDb} from './client-db/client-db';
+import {Model} from './model';
+import {Schema} from './schema';
 
 function MiniMongoose (options){
     options = options || {};
 
     this.resourcePrefix = options.resourcePrefix || "";
     this.backendOrmMediator = options.backendOrmMediator;
-    this.db = new clientDb.ClientDb();
+    this.db = new ClientDb();
     this.models = {};
 }
 
@@ -35,6 +35,4 @@ MiniMongoose.prototype.addToCache = function addToCache(collectionName, docOrDoc
     return this;
 };
 
-module.exports = {
-    MiniMongoose: MiniMongoose
-};
+export {MiniMongoose};
