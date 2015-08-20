@@ -6,8 +6,6 @@ var Schema = mongoose.Schema;
 
 var carSchema = new Schema({
     name: String,
-    brand_id: {type: mongoose.Schema.ObjectId },
-    brand: {type: mongoose.Schema.ObjectId, ref: 'Brand'},
     updated_at: Date
 });
 
@@ -29,32 +27,55 @@ brandSchema.pre('save', function(next){
 var Car = mongoose.model('Car', carSchema);
 var Brand = mongoose.model('Brand', brandSchema);
 
+
 Car.find({}).remove().exec(function(){
     Brand.find({}).remove().exec(function(){
-        new Brand({ name: 'BMW' })
-        .save()
-        .then(function(brand){
-            new Car({
-                name: '325i',
-                brand: brand._id,
-                brand_id: brand._id
-            })
-            .save()
-            .then(function(){
-                new Brand({name:'Ford'})
-                .save()
-                .then(function(brand){
-                    new Car({
-                        name: 'Mustang',
-                        brand: brand._id,
-                        brand_id: brand._id
-                    })
-                    .save();
-                })
-            })
-        });
-    });
 
+        for (var i = 0; i < 33; i++){
+            (function(){
+                var r = Math.floor(Math.random() * 100000);
+
+                Brand.create(
+                    [
+                        {
+                            name: 'BMW',
+                            updated_at: new Date()
+                        },
+                        {
+                            name: 'Ford',
+                            updated_at: new Date()
+                        },
+                        {
+                            name: 'Other Ford',
+                            updated_at: new Date()
+                        }
+                    ],
+                    function(){}
+                );
+
+                Car.create(
+                    [
+                        {
+                            name: '325i',
+                            updated_at: new Date()
+                        },
+                        {
+                            name: 'Mustang',
+                            model: 'Mustang 5.0',
+                            updated_at: new Date()
+                        },
+                        {
+                            name: 'Mustang',
+                            model: 'Mustang GT',
+                            updated_at: new Date()
+                        }
+                    ],
+                    function(){}
+                );
+
+            })();
+        }
+    });
 });
 
 

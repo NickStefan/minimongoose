@@ -7,8 +7,11 @@ var Promise = Query.prototype.Promise;
 var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 function Model(minimongoose, db, modelName, schema, options){
+    options = options || {};
     var self = this;
     var collectionOptions = {};
+
+    this.backendOrmMediator = options.backendOrmMediator || minimongoose.backendOrmMediator;
     this.modelName = modelName;
     this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
     this.resource = '/api/';
@@ -318,7 +321,8 @@ function populate(model, docs, options, cb) {
             mod.options.options.limit = mod.options.options.limit * ids.length;
         }
 
-        mod.Model.find(match, select, mod.options.options, next.bind(this, mod.options, assignmentOpts));
+        //mod.Model.find(match, select, mod.options.options, next.bind(this, mod.options, assignmentOpts));
+        mod.Model.collection.populateHash(match, mod.options.options, next.bind(this, mod.options, assignmentOpts));
     }
 
     function next(options, assignmentOpts, err, valsFromDb) {
@@ -326,7 +330,8 @@ function populate(model, docs, options, cb) {
         if (helpers.isImmutable(valsFromDb)){
             vals = valsFromDb;
         } else {
-            vals = vals.concat(valsFromDb);
+            //vals = vals.concat(valsFromDb);
+            vals = valsFromDb;
         }
         if (--_remaining === 0) {
             resolved(err, vals, options, assignmentOpts);
@@ -342,7 +347,8 @@ function populate(model, docs, options, cb) {
         if (helpers.isImmutable(vals)){
             rawDocs = vals;
         } else {
-            _.forEach(vals, iterateDocs);
+            //_.forEach(vals, iterateDocs);
+            rawDocs = vals;
         }
 
         // optimization:
@@ -533,9 +539,9 @@ function assignVals (o) {
     // replace the original ids in our intermediate _ids structure
     // with the documents found by query
 
-    if (!helpers.isImmutable(o.rawDocs)){
-        assignRawDocsToIdStructure(o.rawIds, o.rawDocs, o.rawOrder, o.options);
-    }
+    // if (!helpers.isImmutable(o.rawDocs)){
+    //     assignRawDocsToIdStructure(o.rawIds, o.rawDocs, o.rawOrder, o.options);
+    // }
 
     // now update the original documents being populated using the
     // result structure that contains real documents.
@@ -556,7 +562,10 @@ function assignVals (o) {
 
     function iterateDocs(doc, i){
         if (_.result(doc, path) === null || _.result(doc, path) === undefined) return;
-        doc[path] = rawIds[i];
+        //doc[path] = rawIds[i];
+
+        doc[path] = rawDocs[doc[path]];
+
         // utils.setValue(path, rawIds[i], docs[i], function (val) {
         //   return valueFilter(val, options);
         // });
@@ -589,67 +598,67 @@ function assignVals (o) {
  * @api private
  */
 
-function assignRawDocsToIdStructure (rawIds, resultDocs, resultOrder, options, recursed) {
-    // honor user specified sort order
-    var newOrder = [];
-    var sorting = options.sort && rawIds.length > 1;
-    var found;
-    var doc;
-    var sid;
-    var id;
+// function assignRawDocsToIdStructure (rawIds, resultDocs, resultOrder, options, recursed) {
+//     // honor user specified sort order
+//     var newOrder = [];
+//     var sorting = options.sort && rawIds.length > 1;
+//     var found;
+//     var doc;
+//     var sid;
+//     var id;
 
-    for (var i = 0; i < rawIds.length; ++i) {
-        id = rawIds[i];
+//     for (var i = 0; i < rawIds.length; ++i) {
+//         id = rawIds[i];
 
-        if (Array.isArray(id)) {
-            // handle [ [id0, id2], [id3] ]
-            assignRawDocsToIdStructure(id, resultDocs, resultOrder, options, true);
-            newOrder.push(id);
-            continue;
-        }
+//         if (Array.isArray(id)) {
+//             // handle [ [id0, id2], [id3] ]
+//             assignRawDocsToIdStructure(id, resultDocs, resultOrder, options, true);
+//             newOrder.push(id);
+//             continue;
+//         }
 
-        if (null === id && !sorting) {
-            // keep nulls for findOne unless sorting, which always
-            // removes them (backward compat)
-            newOrder.push(id);
-            continue;
-        }
+//         if (null === id && !sorting) {
+//             // keep nulls for findOne unless sorting, which always
+//             // removes them (backward compat)
+//             newOrder.push(id);
+//             continue;
+//         }
 
-        sid = String(id);
-        found = false;
+//         sid = String(id);
+//         found = false;
 
-        if (recursed) {
-            // apply find behavior
+//         if (recursed) {
+//             // apply find behavior
 
-            // assign matching documents in original order unless sorting
-            doc = resultDocs[sid];
-            if (doc) {
-                if (sorting) {
-                    newOrder[resultOrder[sid]] = doc;
-                } else {
-                    newOrder.push(doc);
-                }
-            } else {
-                newOrder.push(id);
-            }
-        } else {
-            // apply findOne behavior - if document in results, assign, else assign null
-            newOrder[i] = doc = resultDocs[sid] || null;
-        }
-    }
+//             // assign matching documents in original order unless sorting
+//             doc = resultDocs[sid];
+//             if (doc) {
+//                 if (sorting) {
+//                     newOrder[resultOrder[sid]] = doc;
+//                 } else {
+//                     newOrder.push(doc);
+//                 }
+//             } else {
+//                 newOrder.push(id);
+//             }
+//         } else {
+//             // apply findOne behavior - if document in results, assign, else assign null
+//             newOrder[i] = doc = resultDocs[sid] || null;
+//         }
+//     }
 
-    rawIds.length = 0;
-    if (newOrder.length) {
-        // reassign the documents based on corrected order
+//     rawIds.length = 0;
+//     if (newOrder.length) {
+//         // reassign the documents based on corrected order
 
-        // forEach skips over sparse entries in arrays so we
-        // can safely use this to our advantage dealing with sorted
-        // result sets too.
-        newOrder.forEach(function (doc, i) {
-            rawIds[i] = doc;
-        });
-    }
-}
+//         // forEach skips over sparse entries in arrays so we
+//         // can safely use this to our advantage dealing with sorted
+//         // result sets too.
+//         newOrder.forEach(function (doc, i) {
+//             rawIds[i] = doc;
+//         });
+//     }
+// }
 
 module.exports = {
         Model: Model

@@ -138,9 +138,10 @@ Query.prototype.find = function (conditions, callback) {
     if ('function' == typeof conditions) {
         callback = conditions;
         conditions = {};
-    } else if (conditions instanceof Document) {
-        conditions = conditions.toObject();
     }
+    // else if (conditions instanceof Document) {
+    //     conditions = conditions.toObject();
+    // }
 
     if (mquery.canMerge(conditions)) {
         this.merge(conditions);

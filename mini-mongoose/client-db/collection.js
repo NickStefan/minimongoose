@@ -1,10 +1,14 @@
 var _ = require('../lib/lodash');
 
 var queryServer = require('./query-server').queryServer;
+
 var finder = require('./engine').finder;
 var seeder = require('./engine').seeder;
 var remover = require('./engine').remover;
 var items = require('./engine').items;
+var checker = require('./engine').checker;
+var populateHashFinder = require('./engine').populateHashFinder;
+
 var FlightManager = require('./flight-manager').FlightManager;
 
 function Collection(name, model, options) {
@@ -39,9 +43,12 @@ Collection.prototype.find = function(match, options, cb){
     }
 };
 
+// big O optimization for {_id: {$in: ['2342143']}} type queries
+// such as populate queries
 Collection.prototype.populateHash = function(match, options, cb){
     var self = this;
     var ids = match._id.$in;
+
     var qry = this.flightManager.stringifyQuery(match, options);
     var callback = function(){
         cb(null, populateHashFinder(self.items, match, options));
@@ -54,20 +61,24 @@ Collection.prototype.populateHash = function(match, options, cb){
         this.flightManager.addFlightCallback(qry, callback);
 
     } else {
-        // clone match._id.$in
-        // iterate ids in this.items,
-        // if there, clonedMatch._id.$in.pop()
-        // if clonedMatch.length, queryServer
-        // else callback()
-
-        this.flightManager.addFlightCallback(qry, callback);
-        queryServer(self, match, options, function(err, results){
-            // should add a check for modelName here
-            if (results.results) {
-                self.seed(results.results);
+        var clonedMatch = _.cloneDeep(match);
+        _.forEachRight(ids, function(id){
+            if (checker(self.items, id)){
+                clonedMatch._id.$in.pop()
             }
-            self.flightManager.resolveFlight(qry);
         });
+        if (clonedMatch._id.$in.length){
+            this.flightManager.addFlightCallback(qry, callback);
+            queryServer(self, clonedMatch, options, function(err, results){
+                // should add a check for modelName here
+                if (results.results) {
+                    self.seed(results.results);
+                }
+                self.flightManager.resolveFlight(qry);
+            });
+        } else {
+            callback();
+        }
     }
 };
 

@@ -1,10 +1,16 @@
 var clientDb = require('./client-db/client-db');
 var Model = require('./model').Model;
+var Schema = require('./schema').Schema;
 
-function MiniMongoose (url){
+function MiniMongoose (options){
+    options = options || {};
+
+    this.backendOrmMediator = options.backendOrmMediator;
     this.db = new clientDb.ClientDb();
     this.models = {};
 }
+
+MiniMongoose.Schema = Schema;
 
 // add the model schemas
 MiniMongoose.prototype.model = function(modelName, schema, options) {
@@ -21,7 +27,7 @@ MiniMongoose.prototype.model = function(modelName, schema, options) {
 MiniMongoose.prototype.addToCache = function addToCache(collectionName, docOrDocs){
     this.db.collections[collectionName].seed(docOrDocs);
     return this;
-}
+};
 
 module.exports = {
     MiniMongoose: MiniMongoose

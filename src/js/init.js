@@ -1,5 +1,5 @@
 var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
-var Schema = require('mongoose').Schema;
+var Schema = MiniMongoose.Schema;
 
 var MnM = new MiniMongoose();
 
@@ -13,7 +13,7 @@ MnM.model('Brand', {});
 MnM.model('Car', car);
 
 //load the data
-for (var i = 0; i < 3; i++){
+for (var i = 0; i < 33; i++){
     (function(){
         var r = Math.floor(Math.random() * 100000);
 
@@ -70,30 +70,8 @@ for (var i = 0; i < 3; i++){
 }
 
 // run some queries
-
-window.MnM = MnM;
-
-console.time('bob');
-MnM.models.Car
-.find({name:'Mustang'})
-//.populate({path: 'brand', model: 'Brand'})
-.populate('brand')
-//.limit(1)
-.lean()
-.exec(function(err, results){
-    console.timeEnd('bob')
-});
-
-console.time('bob2');
-MnM.models.Car
-.find({name:'Mustang'})
-//.populate({path: 'brand', model: 'Brand'})
-.populate('brand')
-//.limit(1)
-.lean()
-.exec(function(err, results){
-    console.timeEnd('bob2')
-    console.time('bob3');
+window.run = function(){
+    console.time('bob');
     MnM.models.Car
     .find({name:'Mustang'})
     //.populate({path: 'brand', model: 'Brand'})
@@ -101,8 +79,27 @@ MnM.models.Car
     //.limit(1)
     .lean()
     .exec(function(err, results){
-        // console.log(results);
-        //results.toList().toJS()
-        console.timeEnd('bob3');
+        console.timeEnd('bob')
     });
-});
+}
+
+// console.time('bob2');
+// MnM.models.Car
+// .find({name:'Mustang'})
+// //.populate({path: 'brand', model: 'Brand'})
+// //.populate('brand')
+// //.limit(1)
+// .lean()
+// .exec(function(err, results){
+//     console.timeEnd('bob2')
+//     console.time('bob3');
+//     MnM.models.Car
+//     .find({name:'Mustang'})
+//     //.populate({path: 'brand', model: 'Brand'})
+//     //.populate('brand')
+//     //.limit(1)
+//     .lean()
+//     .exec(function(err, results){
+//         console.timeEnd('bob3');
+//     });
+// });

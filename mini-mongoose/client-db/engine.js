@@ -48,6 +48,14 @@ function removerImmutable(collection, items, docs){
     // TODO
 }
 
+function checker(items, key){
+    return Boolean(items[key]);
+}
+
+function checkerImmutable(items, key){
+    return Boolean(items.get(key));
+}
+
 function finder(items, match, options) {
     options = options || {};
     // prepare lazy lodash query
@@ -77,13 +85,75 @@ function finder(items, match, options) {
 function finderImmutable(items, match, options){
     options = options || {};
 
-    // if its a straight populate, use hash table shortcut
+    var query = items.filter(function(doc){
+        return compileDocumentSelector(match)(doc);
+    });
+
+    if (options.sort) {
+        // TODO
+        // make work with immutable
+        query = query.sort(compileSort(options.sort));
+    }
+    if (options.skip) {
+        query = query.slice(options.skip);
+    }
+    if (options.limit) {
+        query = query.slice(0, options.limit);
+    }
+    if (options.fields) {
+        // TODO
+        // make work with immutable
+        query = query.map(function(doc){ return _.pick(doc, options.fields)});
+    }
+    return query;
+}
+
+function populateHashFinder(items, match, options){
+    options = options || {};
+
+    var query = {};
+
+    _.forEach(match._id.$in, function(id){
+        query[id] = items[id];
+    });
+
+    query = _.chain(query);
+
+    if (_.keys(match).length !== 1 && match._id && match._id.$in){
+        query = query.filter(function(doc){
+            return compileDocumentSelector(match)(doc);
+        });
+    }
+
+    query.cloneDeep();
+
+    if (options.sort) {
+        query = query.sort(compileSort(options.sort))
+    }
+    if (options.skip) {
+        query = query.slice(options.skip);
+    }
+    if (options.limit) {
+        query = query.slice(0, options.limit);
+    }
+    if (options.fields) {
+        query = query.map(function(doc){ return _.pick(doc, options.fields)});
+    }
+
+    // lodash lazy evaluate the query
+    // http://filimanjaro.com/blog/2014/introducing-lazy-evaluation/
+    return query.value();
+}
+
+function populateHashFinderImmutable(items, match, options){
+    options = options || {};
+
     var query;
     if (_.keys(match).length === 1 && match._id && match._id.$in){
         query = items;
 
     // if its a populate with constraints, shrink the space
-    } else if (match._id && match._id.$in){
+    } else {
         query = Immutable.OrderedMap().withMutations(function(map){
             _.forEach(match._id.$in, function(id){
                 map = map.set(id, items.get(id));
@@ -91,9 +161,7 @@ function finderImmutable(items, match, options){
             return map;
         });
 
-    // not a populate
-    } else {
-        query = items.filter(function(doc){
+        query = query.filter(function(doc){
             return compileDocumentSelector(match)(doc);
         });
     }
@@ -117,16 +185,20 @@ function finderImmutable(items, match, options){
     return query;
 }
 
-module.exports = {
-	finder: finder,
-    seeder: seeder,
-    remover: remover,
-    items: items
-};
-
 // module.exports = {
-//     finder: finderImmutable,
-//     seeder: seederImmutable,
-//     remover: removerImmutable,
-//     items: itemsImmutable
+// 	finder: finder,
+//     seeder: seeder,
+//     remover: remover,
+//     checker: checker,
+//     populateHashFinder: populateHashFinder,
+//     items: items
 // };
+
+module.exports = {
+    finder: finderImmutable,
+    seeder: seederImmutable,
+    remover: removerImmutable,
+    checker: checkerImmutable,
+    populateHashFinder: populateHashFinderImmutable,
+    items: itemsImmutable
+};

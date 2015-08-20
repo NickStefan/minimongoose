@@ -1,5 +1,6 @@
 var EJSON = require('./EJSON');
 var request = require('jquery');
+var _ = require('../lib/lodash');
 
 function prepareParams(match, options){
     match = match || {};
@@ -43,12 +44,25 @@ function http(verb, params, url){
 function queryServer(collection, match, options, cb){
 	options.modelName = collection.collectionName;
 	options.operation = 'find';
-	var params = prepareParams(match, options);
 
-	http('post', params, collection.model.resource)
-    .done(function(results){
-        cb(null, results);
-    });
+    // if node
+    if (collection.model.backendOrmMediator){
+        for (var k in options) {
+            if (typeof options[k] == 'undefined') {
+                delete options[k];
+            }
+        }
+        collection.model.backendOrmMediator(match, options, cb);
+
+    // browser
+    } else {
+    	var params = prepareParams(match, options);
+
+    	http('post', params, collection.model.resource)
+        .done(function(results){
+            cb(null, results);
+        });
+    }
 }
 
 module.exports = {
