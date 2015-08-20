@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 function mongoMongooseMediator(req, res, cb){
-	console.log(req.body)
 	var params = req.body;
 	var model = req.db[params.modelName];
 	var query = model[params.operation](JSON.parse(params.match));

@@ -1,7 +1,9 @@
 var MiniMongoose = require('../../mini-mongoose/mini-mongoose').MiniMongoose;
 var Schema = MiniMongoose.Schema;
 
-var MnM = new MiniMongoose();
+var MnM = new MiniMongoose({
+    resourcePrefix: '/api/'
+});
 
 var car = new Schema({
     brand: {type: String, ref: 'Brand'}
@@ -80,6 +82,7 @@ window.run = function(){
     .lean()
     .exec(function(err, results){
         console.timeEnd('bob')
+        console.log(results);
     });
 }
 

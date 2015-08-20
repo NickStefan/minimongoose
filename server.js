@@ -9,6 +9,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cons = require('consolidate');
 
+var MnM = require('./MnM').MnM;
 var db = require('./db');
 
 var routes = require('./routes/index');
@@ -31,6 +32,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('*', function(req, res, next){
+    req.MnM = MnM;
     req.db = db;
     next();
 });

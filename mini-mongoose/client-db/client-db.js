@@ -1,3 +1,4 @@
+var _ = require('../lib/lodash');
 
 var Collection = require('./collection').Collection;
 
@@ -11,6 +12,12 @@ ClientDb.prototype.addCollection = function(name, options) {
 
 ClientDb.prototype.removeCollection = function(name) {
     delete this.collections[name];
+};
+
+ClientDb.prototype.empty = function(){
+	_.forEach(this.collections, function(collection){
+		collection.empty();
+	});
 };
 
 module.exports = {

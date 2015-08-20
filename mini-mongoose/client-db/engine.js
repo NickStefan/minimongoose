@@ -44,8 +44,13 @@ function remover(items, docs){
     });
 }
 
-function removerImmutable(collection, items, docs){
-    // TODO
+function removerImmutable(items, docs){
+    items.withMutations(function(map){
+        maps.forEach(function(doc, key){
+            map.remove(key);
+        });
+        return map;
+    });
 }
 
 function checker(items, key){

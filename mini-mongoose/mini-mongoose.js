@@ -5,6 +5,7 @@ var Schema = require('./schema').Schema;
 function MiniMongoose (options){
     options = options || {};
 
+    this.resourcePrefix = options.resourcePrefix || "";
     this.backendOrmMediator = options.backendOrmMediator;
     this.db = new clientDb.ClientDb();
     this.models = {};
@@ -22,8 +23,13 @@ MiniMongoose.prototype.model = function(modelName, schema, options) {
     return model;
 };
 
+MiniMongoose.prototype.empty = function(){
+    this.db.empty();
+};
+
 // add models to cache
 // this should be a method on a model. not on minimongoose
+// !for testing only!
 MiniMongoose.prototype.addToCache = function addToCache(collectionName, docOrDocs){
     this.db.collections[collectionName].seed(docOrDocs);
     return this;

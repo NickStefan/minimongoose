@@ -86,6 +86,11 @@ Collection.prototype.seed = function(docs) {
     this.items = seeder(this.items, docs);
 };
 
+Collection.prototype.empty = function(){
+    this.items = items();
+    this.flightManager = new FlightManager();
+};
+
 Collection.prototype.findOne = function(match, options, cb){
     // err, results
     this.find(match, options, function(err, results){
@@ -122,7 +127,7 @@ Collection.prototype.findAndModify = function(match, update, options, cb){
 Collection.prototype.remove = function(match, options, cb) {
     var self = this;
     this.find(match, options, function(err, results){
-        remover(self, self.items, results);
+        remover(self.items, results);
         cb(null, results);
     });
 };

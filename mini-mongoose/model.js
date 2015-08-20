@@ -8,13 +8,16 @@ var parsePopulatePaths = require('./populate').parsePopulatePaths;
 
 function Model(minimongoose, db, modelName, schema, options){
     options = options || {};
+    options.resource = options.resource || "";
+    options.resourcePrefix = options.resourcePrefix || true;
+
     var self = this;
     var collectionOptions = {};
 
     this.backendOrmMediator = options.backendOrmMediator || minimongoose.backendOrmMediator;
     this.modelName = modelName;
     this.collectionName = modelName; // for now, theyre equal, but should be modelName: Car, collectionName: Cars... capitals???
-    this.resource = '/api/';
+    this.resource = options.resourcePrefix === false ? options.resource : minimongoose.resourcePrefix + options.resource;
 
     // create clientDb collection
     this.db = db;
