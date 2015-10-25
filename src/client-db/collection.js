@@ -13,6 +13,8 @@ function Collection(name, model, options) {
 
 Collection.prototype.find = function(match, options, cb){
     var self = this;
+    
+    var flightManager = this.flightManager;
     var qry = this.flightManager.stringifyQuery(match, options);
     var callback = function(){
         cb(null, finder(self.items, match, options));
@@ -31,7 +33,7 @@ Collection.prototype.find = function(match, options, cb){
             if (results.results) {
                 self.seed(results.results);
             }
-            self.flightManager.resolveFlight(qry);
+            flightManager.resolveFlight(qry);
         });
     }
 };
