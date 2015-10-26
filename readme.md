@@ -58,6 +58,22 @@ MnM.models.Car
 .populate('brand')
 .exec(function(err, cars){
   console.log( cars.toJS() );
+  /* 
+  {
+    "562d869b32c4e3e31af61599": {
+        "_id": "562d869b32c4e3e31af61599",
+        "updated_at": "2015-10-26T01:49:15.665Z",
+        "brand": {
+            "_id": "562d869b32c4e3e31af61595",
+            "updated_at": "2015-10-26T01:49:15.658Z",
+            "name": "Ford",
+            "__v": 0
+        },
+        "name": "Mustang",
+        "__v": 0
+    }
+  }
+  */
 });
 ~~~
 
