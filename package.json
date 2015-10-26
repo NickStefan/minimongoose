@@ -1,14 +1,18 @@
 {
   "name": "minimongoose",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "build/mini-mongoose.js",
   "scripts": {
-    "postinstall": "npm run lodash-build",
+    "postinstall": "npm run lodash-build && gulp",
     "lodash-build": "lodash -o mini-mongoose/lib/lodash.custom.js include=forEachRight,slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"
   },
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Nick Stefan",
+    "email": "nickstefan12@gmail.com",
+    "url": "http://github.com/nickstefan/"
+  },
+  "license": "MIT",
   "dependencies": {
     "gulp": "3.8.10",
     "gulp-babel": "^5.2.1",
