@@ -1,10 +1,10 @@
 {
   "name": "minimongoose",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "build/mini-mongoose.js",
   "scripts": {
-    "postinstall": "npm run lodash-build && gulp",
+    "postinstall": "gulp",
     "lodash-build": "lodash -o src/lib/lodash.custom.js include=forEachRight,slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"
   },
   "author": {
