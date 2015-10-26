@@ -6,21 +6,16 @@ router.get('/', function(req, res, next) {
 
     req.MnM.models.Car
     .find({name:'Mustang'})
-    //.populate('brand')
-    //.limit(1)
+    .populate('brand')
     .lean()
     .exec(function(err, results){
         res.render('index', {
             cache: false,
             title: 'minimongoose',
-            results: results
+            serverResults: JSON.stringify(results.toJSON(), null, 4)
         });
-        next();
-        //console.log(results);
     });
 
-}, function(req, res, next){
-    req.MnM.empty();
 });
 
 module.exports = router;

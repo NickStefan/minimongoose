@@ -4,13 +4,14 @@ mongoose.connect('mongodb://localhost/minimongoose4');
 
 var Schema = mongoose.Schema;
 
-var carSchema = new Schema({
+var brandSchema = new Schema({
     name: String,
     updated_at: Date
 });
 
-var brandSchema = new Schema({
+var carSchema = new Schema({
     name: String,
+    brand: { type: Schema.ObjectId , ref: 'Brand' },
     updated_at: Date
 });
 
@@ -31,50 +32,61 @@ var Brand = mongoose.model('Brand', brandSchema);
 Car.find({}).remove().exec(function(){
     Brand.find({}).remove().exec(function(){
 
-        for (var i = 0; i < 33; i++){
-            (function(){
-                var r = Math.floor(Math.random() * 100000);
-
-                Brand.create(
-                    [
-                        {
-                            name: 'BMW',
-                            updated_at: new Date()
-                        },
-                        {
-                            name: 'Ford',
-                            updated_at: new Date()
-                        },
-                        {
-                            name: 'Other Ford',
-                            updated_at: new Date()
-                        }
-                    ],
-                    function(){}
+        Brand.create(
+            {
+                name: 'BMW'
+            },
+            function(err, bmw){
+                Car.create(
+                    {
+                        brand: bmw._id,
+                        name: '325i'
+                    }, function(){}
                 );
 
                 Car.create(
-                    [
-                        {
-                            name: '325i',
-                            updated_at: new Date()
-                        },
-                        {
-                            name: 'Mustang',
-                            model: 'Mustang 5.0',
-                            updated_at: new Date()
-                        },
-                        {
-                            name: 'Mustang',
-                            model: 'Mustang GT',
-                            updated_at: new Date()
-                        }
-                    ],
-                    function(){}
+                    {
+                        brand: bmw._id,
+                        name: 'm5'
+                    }, function(){}
                 );
 
-            })();
-        }
+                Car.create(
+                    {
+                        brand: bmw._id,
+                        name: 'm3'
+                    }, function(){}
+                );
+            }
+        );
+
+        Brand.create(
+            {
+                name: 'Ford'
+            },
+            function(err, ford){
+                Car.create(
+                    {
+                        brand: ford._id,
+                        name: 'Mustang'
+                    }, function(){}
+                );
+
+                Car.create(
+                    {
+                        brand: ford._id,
+                        name: 'Taurus'
+                    }, function(){}
+                );
+
+                Car.create(
+                    {
+                        brand: ford._id,
+                        name: 'Focus'
+                    }, function(){}
+                );
+            }
+        );
     });
 });
 

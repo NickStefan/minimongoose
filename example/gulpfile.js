@@ -13,8 +13,8 @@ gulp.task('browserify', function(){
 
 });
 
-gulp.task('dev',['browserify']);
+gulp.task('default',['browserify']);
 
 gulp.task('watch', function(){
-    gulp.watch('src/**/*.*', ['dev']);
+    gulp.watch('src/**/*.*', ['default']);
 });

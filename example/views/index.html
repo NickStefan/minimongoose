@@ -1,7 +1,11 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-    <div class="results">
-    	{{ results }}
+    <h2>Server Results</h2>
+    <div class="serverResults" style="white-space:pre">
+    	{{ serverResults }}
+    </div>
+    <h2>Client Results </h2>
+    <div class="results" style="white-space:pre">
     </div>
 {% endblock %}

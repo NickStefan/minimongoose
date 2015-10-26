@@ -9,6 +9,9 @@
     "email": "nick@brandcast.com",
     "url": "http://github.com/nickstefan/"
   },
+  "scripts": {
+    "postinstall": "gulp"
+  },
   "dependencies": {
     "body-parser": "1.0.0",
     "consolidate": "0.10.0",
