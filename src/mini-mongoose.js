@@ -35,4 +35,5 @@ MiniMongoose.prototype.addToCache = function addToCache(collectionName, docOrDoc
     return this;
 };
 
-export {MiniMongoose};
+export default MiniMongoose;
+export { MiniMongoose };
