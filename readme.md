@@ -65,8 +65,8 @@ The immutable implimentation actually speeds up the querying and populating of l
 
 ### Example APP
 
-Once you've cloned the repo down:
-`$ npm install && gulp && cd example && npm install && gulp && node server.js`
+Once you've cloned the git repo down:
+`$ npm install && cd example && npm install && node server.js`
 vist localhost:3000
 
 

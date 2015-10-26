@@ -5,7 +5,7 @@
   "main": "build/mini-mongoose.js",
   "scripts": {
     "postinstall": "npm run lodash-build && gulp",
-    "lodash-build": "lodash -o mini-mongoose/lib/lodash.custom.js include=forEachRight,slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"
+    "lodash-build": "lodash -o src/lib/lodash.custom.js include=forEachRight,slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"
   },
   "author": {
     "name": "Nick Stefan",

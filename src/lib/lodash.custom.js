@@ -1,7 +1,7 @@
 /**
  * @license
  * lodash 3.10.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash -o mini-mongoose/lib/lodash.custom.js include="forEachRight,slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"`
+ * Build: `lodash -o src/lib/lodash.custom.js include="forEachRight,slice,isNaN,each,forEach,extend,isObject,isArray,isEmpty,any,every,all,has,map,filter,size,isArguments,isFunction,cloneDeep,object,pluck,pick,first,rest,last,values,defaults,isEqual,result,chain,value,flatten,uniq,keys"`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
